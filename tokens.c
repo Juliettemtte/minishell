@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 17:13:54 by jmouette          #+#    #+#             */
-/*   Updated: 2024/09/16 17:57:10 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/09/16 18:13:56 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void print_tokens(t_token **tokens) {
 }
 
 
-static int count_cmd_list(char **cmd_list)
+int count_cmd_list(char **cmd_list)
 {
 	int count;
 
@@ -73,7 +73,7 @@ static t_token	*create_token(char *cmd_part)
 	return (token);
 }
 
-void	tokenize_cmd_list(t_var *var)
+void	tokenize_cmd_list(t_var *var, t_token **tokens)
 {
 	t_token	**tokens;
 	int     i;

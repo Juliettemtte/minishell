@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/09/16 17:52:20 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/09/16 18:14:22 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,8 @@ int		parse(t_var *variables);
 char	*find_cmd_path(char *cmd);
 
 /************** tokens ***************/
-void	tokenize_cmd_list(t_var *var);
+int count_cmd_list(char **cmd_list);
+void	tokenize_cmd_list(t_var *var, t_token **tokens);
 
 /************ split_input ************/
 char	**split_input(char const *s, char c);
