@@ -1,0 +1,76 @@
+Left to do:
+-Learn how everything works
+-Pipes
+-$?
+- <
+-Launching executables
+-Complete parsing logic
+-Clean up the code
+
+
+Kind of working for now:
+-Display prompt
+-Working history
+-Handle quotes
+-Handle ctrl-C, -D, and -\
+-cd
+-echo -n
+-pwd
+-exit
+-env
+- > >> (only works for echo and pwd)
+- <<
+- unset
+- export & export ARG
+
+
+Some thoughts of the day:
+
+echo a > test.txt | echo 1
+It seems the pipe takes precedence over the redirection and > does nothing.
+The ouput of echo a is sent to echo 1 as an input.
+(echo a > test.txt) | echo 1
+Would do the redirection first.
+
+
+10.9.24
+We may need to save the output from one valid set of instructions in the cmd_list
+as an input for the next. For example:
+cat << s > test.txt
+would wait for input until a line of input is only s followed by newline, then
+cat the resulted list of text, which will be used as an input for the > operator
+and saved in test.txt.
+First action:
+cat << s
+string1
+string2
+s
+input for cat is the result of << operation, which is the 2 lines of text until s
+is encountered on it's own. cat will then output the result as an input for the >
+operator.
+Second action:
+"string1\nstring2\n" > test.txt
+So instead of ever showing any output on the terminal, the output was instead
+redirected as an input for test.txt. This doesn't work with echo, because echo
+doesn't read stdin. It seems we can't really utilize the << operator that well
+with the function we are given. It only seems to really work with env, where it
+can be used to give multiple instructions at once. However, << works on it's own
+as well:
+<< s > test.txt
+string1
+string2
+s
+results in the same outcome. It seems we can also have multiple << operators in
+a row:
+<< 1 << 2 << 3 << 4
+
+Maybe this program structure would work:
+-read the input
+-check validity
+-break the input into separate processes
+-(check the validity of each process separately?)
+-do a process, return the output as a string(?)
+-take the output from the last process as input for the next
+-repeat until no processes are left
+-read the next input
+-repeat until exit
