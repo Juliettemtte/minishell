@@ -1,4 +1,5 @@
 Left to do:
+-Complete tokenisation logic
 -Learn how everything works
 -Pipes
 -$?
@@ -25,6 +26,9 @@ Kind of working for now:
 
 
 Some thoughts of the day:
+
+echo a > test.txt 1 > test2.txt
+results in "a 1" being written in both .txt files
 
 echo a > test.txt | echo 1
 It seems the pipe takes precedence over the redirection and > does nothing.

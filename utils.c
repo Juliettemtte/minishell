@@ -6,57 +6,13 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 16:22:51 by jmouette          #+#    #+#             */
-/*   Updated: 2024/09/16 17:49:54 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/09/17 17:06:38 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	check_format(char *arg)
-{
-	int	i;
-	int	equal;
-
-	i = 0;
-	equal = 0;
-	if (!ft_isalpha(arg[0]))
-		return (1);
-	while (arg[i])
-	{
-		if (arg[i] == '=')
-			equal = 1;
-		else if (!ft_isalnum(arg[i]) && arg[i] != '_' && arg[i] != '"')
-			return (1);
-		i++;
-	}
-	if (equal == 0)
-		return (1);
-	return (0);
-}
-
-int	check_quotes(char *input)
-{
-	int	i;
-	int	single_quote;
-	int	double_quote;
-
-	i = 0;
-	single_quote = 0;
-	double_quote = 0;
-	while (input[i])
-	{
-		if (input[i] == '\'')
-			single_quote++;
-		if (input[i] == '\"')
-			double_quote++;
-		i++;
-	}
-	if (single_quote % 2 != 0 || double_quote % 2 != 0)
-		return (1);
-	return (0);
-}
-
-void	ft_swap(char **a, char **b)
+static void	ft_swap(char **a, char **b)
 {
 	char	*tmp;
 
@@ -83,19 +39,6 @@ void	bubble_sort(char **arr, int n)
 		}
 		i++;
 	}
-}
-
-void	free_list(char **list)
-{
-	int	i;
-
-	i = 0;
-	while (list[i])
-	{
-		free(list[i]);
-		i++;
-	}
-	free(list);
 }
 
 int	ft_strcmp(const char *s1, const char *s2)
@@ -132,5 +75,13 @@ int	is_builtins(char *cmd)
 		return (8);
 	if (ft_strcmp(cmd, "unset") == 0)
 		return (9);
+	if (ft_strcmp(cmd, "|") == 0)
+		return (10);
+	if (ft_strcmp(cmd, ">") == 0)
+		return (11);
+	if (ft_strcmp(cmd, "<") == 0)
+		return (12);
+	if (ft_strcmp(cmd, ">>") == 0)
+		return (13);
 	return (0);
 }

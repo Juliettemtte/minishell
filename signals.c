@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 14:26:15 by arissane          #+#    #+#             */
-/*   Updated: 2024/09/11 14:00:24 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/09/17 16:31:03 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static void	handle_signal(int sig)
 	}
 }
 
-void	disable_control_chars()
+static void	disable_control_chars()
 {
 	struct termios termios_p;
 

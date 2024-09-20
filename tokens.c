@@ -6,36 +6,35 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 17:13:54 by jmouette          #+#    #+#             */
-/*   Updated: 2024/09/16 18:13:56 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/09/20 13:16:39 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
+/*
 void print_token_type(t_token_type type) {
     switch (type) {
         case COMMAND:           printf("COMMAND"); break;
         case ARGUMENT:          printf("ARGUMENT"); break;
+        case OPTION:         	printf("OPTION"); break;
         case PIPE:              printf("PIPE"); break;
-        case REDIRECTION_IN:    printf("REDIRECTION_IN"); break;
-        case REDIRECTION_OUT:   printf("REDIRECTION_OUT"); break;
-        case REDIRECTION_APPEND:printf("REDIRECTION_APPEND"); break;
+        case REDIRECTION_LEFT:    printf("REDIRECTION_LEFT"); break;
+        case REDIRECTION_RIGHT:   printf("REDIRECTION_RIGHT"); break;
+        case APPEND:		printf("APPEND"); break;
         case HEREDOC:           printf("HEREDOC"); break;
-        case FILENAME:          printf("FILENAME"); break;
         default:                printf("UNKNOWN"); break;
     }
 }
 
-void print_tokens(t_token **tokens) {
+void print_tokens(t_token *tokens) {
     int i = 0;
-    while (tokens[i] != NULL) {
-        print_token_type(tokens[i]->type);
-        printf(": %s\n", tokens[i]->value);
+    while (tokens[i].value != NULL) {
+        print_token_type(tokens[i].type);
+        printf(": %s\n", tokens[i].value);
         i++;
     }
 }
-
-
+*/
 int count_cmd_list(char **cmd_list)
 {
 	int count;
@@ -48,45 +47,43 @@ int count_cmd_list(char **cmd_list)
 	return count;
 }
 
-static t_token	*create_token(char *cmd_part)
+static void	create_token(char *cmd_part, t_token *tokens)
 {
-	t_token	*token;
-
-	token = malloc(sizeof(t_token));
-	if (!token)
-		return (NULL);
-	if (ft_strcmp(cmd_part, "|") == 0)
-		token->type = PIPE;
-	else if (ft_strcmp(cmd_part, ">") == 0)
-		token->type = REDIRECTION_OUT;
-	else if (ft_strcmp(cmd_part, ">>") == 0)
-		token->type = REDIRECTION_APPEND;
-	else if (ft_strcmp(cmd_part, "<") == 0)
-		token->type = REDIRECTION_IN;
-	else if (ft_strcmp(cmd_part, "<<") == 0)
-		token->type = HEREDOC;
+	if (!cmd_part)
+		return ;
+	if (cmd_part[0] == '-')
+		tokens->type = OPTION;
+	else if (is_builtins(cmd_part) == 10)
+		tokens->type = PIPE;
+	else if (is_builtins(cmd_part) == 11)
+		tokens->type = REDIRECTION_RIGHT;
+	else if (is_builtins(cmd_part) == 13)
+		tokens->type = APPEND;
+	else if (is_builtins(cmd_part) == 12)
+		tokens->type = REDIRECTION_LEFT;
+	else if (is_builtins(cmd_part) == 3)
+		tokens->type = HEREDOC;
 	else if (find_cmd_path(cmd_part) != NULL || is_builtins(cmd_part) != 0)
-		token->type = COMMAND;
+		tokens->type = COMMAND;
 	else
-		token->type = ARGUMENT;
-	token->value = ft_strdup(cmd_part);
-	return (token);
+		tokens->type = ARGUMENT;
+	tokens->value = ft_strdup(cmd_part);
 }
 
-void	tokenize_cmd_list(t_var *var, t_token **tokens)
+void	tokenize_cmd_list(t_var *var, t_token *tokens)
 {
-	t_token	**tokens;
 	int     i;
 
-	tokens = malloc(sizeof(t_token *) * (count_cmd_list(var->cmd_list) + 1));
-	if (!tokens)
-		return ;
 	i = 0;
+	if (!tokens || !var || !var->cmd_list)
+		return;
 	while (var->cmd_list[i])
 	{
-		tokens[i] = create_token(var->cmd_list[i]);
+		create_token(var->cmd_list[i], &tokens[i]);
 		i++;
 	}
-	tokens[i] = NULL;
-	print_tokens(tokens);
+	//free_list(var->cmd_list);
+	tokens[i].type = UNKNOWN;
+	tokens[i].value = NULL;
+//	print_tokens(tokens);
 }

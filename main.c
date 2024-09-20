@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:42:58 by arissane          #+#    #+#             */
-/*   Updated: 2024/09/16 18:18:02 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/09/20 13:18:16 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,21 +19,51 @@ static void	initialise(t_var *variables)
 	variables->heredoc = ft_strdup("");
 }
 
-static void	ft_free(t_var *var, t_token **tokens)
+/*static void	free_var_token(t_var *var, t_token **tokens)
 {
 	int	i;
 
-	free(var->input);
-	free(var);
-	free_list(var->cmd_list);
+	if (var->input != NULL)
+		free(var->input);
 	i = 0;
 	while (tokens[i] != NULL)
 	{
 		free(tokens[i]->value);
-		free(tokens[i]);
+		if (tokens[i] != NULL)
+			free(tokens[i]);
 		i++;
 	}
-	free(tokens);
+	if (tokens != NULL)
+		free(tokens);
+}*/
+
+void	run_token_commands(t_token *token)
+{
+	int	i;
+//	int	fd;
+//	int	pid;
+
+	i = 0;
+/*	if (found_redirect)
+	{
+		pid = fork();
+		if (pid == 0)
+		{
+			fd = check_redirect2();
+			dup2(fd, STDIN_FILENO);
+		}
+		else
+		{
+		}
+	}*/
+	while (token[i].value)
+	{
+		printf("found a token\n");
+		printf("value = %s\n", token[i].value);
+		if (token[i].type)
+			printf("type = %d\n", token[i].type);
+		i++;
+	}
 }
 
 int	main(void)
@@ -59,12 +89,16 @@ int	main(void)
 			printf("invalid input\n");
 		tokens = malloc(sizeof(t_token) * (count_cmd_list(variables.cmd_list) + 1));
 		if (!tokens)
-			return ;
-		tokenize_cmd_list(&variables, &tokens);
+			return (1);
+		tokenize_cmd_list(&variables, tokens);
+//		if (check_command_syntax(tokens) == 1)
+			//do not execute
+		run_token_commands(tokens);
 		if (variables.input)
 		{
 			add_history(variables.input);
-			ft_free(&variables, &tokens);
+			free(variables.input);
+			//free_var_token(&variables, &tokens);
 		}
 		if (check == 1)
 		{
@@ -72,6 +106,6 @@ int	main(void)
 			break ;
 		}
 	}
-	ft_free(&variables, &tokens);
+	//free_var_token(&variables, &tokens);
 	return (0);
 }
