@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:07 by arissane          #+#    #+#             */
-/*   Updated: 2024/09/20 09:31:27 by arissane         ###   ########.fr       */
+/*   Updated: 2024/09/21 15:21:45 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ static int	run_command2(t_var *var)
 		free_list(value);
 	}
 	else
-		return (-1);
+		find_cmd_path(var->cmd_list);
 	return (0);
 }
 
@@ -81,15 +81,18 @@ int	parse(t_var *var)
 	int		i;
 
 	if (check_quotes(var->input))
-		return (-1);
+		return (1);
 	var->cmd_list = split_input(var->input, ' ');
+	if (!var->cmd_list)
+		return (1);
 	i = 0;
 	check = 0;
 	while (!var->cmd_list[i])
 	{
 		var->cmd_list[i] = ft_strtrim(var->cmd_list[i], "\'\"");
+		if (!var->cmd_list[i])
+			return (1);
 		i++;
 	}
-	check = run_command(var);
-	return (check);
+	return (0);
 }
