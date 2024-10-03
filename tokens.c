@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 17:13:54 by jmouette          #+#    #+#             */
-/*   Updated: 2024/09/21 15:35:22 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/02 16:00:08 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,27 +33,27 @@ void print_tokens(t_token *tokens) {
         printf(": %s\n", tokens[i].value);
         i++;
     }
-}
-*/
-int count_cmd_list(char **cmd_list)
+}*/
+
+int	count_cmd_list(char **cmd_list)
 {
-	int count;
+	int	count;
 
 	count = 0;
 	if (cmd_list == NULL)
-		return 0;
+		return (0);
 	while (cmd_list[count] != NULL)
 		count++;
-	return count;
+	return (count);
 }
 
 static void	create_token(char *cmd_part, t_token *tokens)
 {
 	if (!cmd_part)
 		return ;
-	if (cmd_part[0] == '-')
-		tokens->type = OPTION;
-	else if (is_builtins(cmd_part) == 10)
+//	if (cmd_part[0] == '-')
+//		tokens->type = OPTION;
+	else if (is_builtins(cmd_part) == 9)
 		tokens->type = PIPE;
 	else if (is_builtins(cmd_part) == 11)
 		tokens->type = REDIRECTION_RIGHT;
@@ -61,7 +61,7 @@ static void	create_token(char *cmd_part, t_token *tokens)
 		tokens->type = APPEND;
 	else if (is_builtins(cmd_part) == 12)
 		tokens->type = REDIRECTION_LEFT;
-	else if (is_builtins(cmd_part) == 3)
+	else if (is_builtins(cmd_part) == 10)
 		tokens->type = HEREDOC;
 	else if (find_cmd_path(cmd_part) != NULL || is_builtins(cmd_part) != 0)
 		tokens->type = COMMAND;
@@ -72,18 +72,19 @@ static void	create_token(char *cmd_part, t_token *tokens)
 
 void	tokenize_cmd_list(t_var *var, t_token *tokens)
 {
-	int     i;
+	int	i;
 
 	i = 0;
 	if (!tokens || !var || !var->cmd_list)
-		return;
+		return ;
 	while (var->cmd_list[i])
 	{
 		create_token(var->cmd_list[i], &tokens[i]);
+		if (tokens[i].type == COMMAND)
+			var->commands++;
 		i++;
 	}
 	//free_list(var->cmd_list);
-	tokens[i].type = UNKNOWN;
 	tokens[i].value = NULL;
 //	print_tokens(tokens);
 }

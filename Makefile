@@ -6,7 +6,7 @@
 #    By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/03 11:23:04 by arissane          #+#    #+#              #
-#    Updated: 2024/09/17 16:36:07 by jmouette         ###   ########.fr        #
+#    Updated: 2024/10/03 17:19:02 by jmouette         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,9 @@ CC = cc
 CFLAGS = -Wall -Werror -Wextra
 
 SRCS = main.c signals.c parse.c split_input.c builtins.c builtins2.c redirect.c\
-	utils.c pipes.c tokens.c check.c free_exit.c
+	utils.c pipes.c check.c free_shell.c commands.c find_path.c tokens.c\
+	execute.c split_tokens.c\
+	builtins/cd.c builtins/exit.c
 
 OFILES = $(SRCS:.c=.o)
 

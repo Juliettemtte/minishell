@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 16:22:51 by jmouette          #+#    #+#             */
-/*   Updated: 2024/09/17 17:06:38 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/09/30 11:53:42 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,21 +61,21 @@ int	is_builtins(char *cmd)
 		return (1);
 	if (ft_strcmp(cmd, "EOF") == 0)
 		return (2);
-	if (ft_strcmp(cmd, "<<") == 0)
-		return (3);
 	if (ft_strcmp(cmd, "pwd") == 0)
-		return (4);
+		return (3);
 	if (ft_strcmp(cmd, "echo") == 0)
-		return (5);
+		return (4);
 	if (ft_strcmp(cmd, "cd") == 0)
-		return (6);
+		return (5);
 	if (ft_strcmp(cmd, "env") == 0)
-		return (7);
+		return (6);
 	if (ft_strcmp(cmd, "export") == 0)
-		return (8);
+		return (7);
 	if (ft_strcmp(cmd, "unset") == 0)
-		return (9);
+		return (8);
 	if (ft_strcmp(cmd, "|") == 0)
+		return (9);
+	if (ft_strcmp(cmd, "<<") == 0)
 		return (10);
 	if (ft_strcmp(cmd, ">") == 0)
 		return (11);

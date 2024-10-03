@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:42:58 by arissane          #+#    #+#             */
-/*   Updated: 2024/09/20 13:18:16 by arissane         ###   ########.fr       */
+/*   Updated: 2024/10/03 17:23:23 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,72 +17,48 @@ static void	initialise(t_var *variables)
 	variables->input = NULL;
 	variables->cmd_list = NULL;
 	variables->heredoc = ft_strdup("");
+	variables->commands = 0;
+	variables->pipes = 0;
+	variables->status = 0;
+	variables->is_redirect = 0;
 }
 
-/*static void	free_var_token(t_var *var, t_token **tokens)
+static int	count_cmd(char **cmd_list)
 {
+	int	count;
 	int	i;
 
-	if (var->input != NULL)
-		free(var->input);
 	i = 0;
-	while (tokens[i] != NULL)
+	count = 0;
+	while (cmd_list[i])
 	{
-		free(tokens[i]->value);
-		if (tokens[i] != NULL)
-			free(tokens[i]);
+		if (ft_strcmp(cmd_list[i], "|") == 0)
+			count++;
 		i++;
 	}
-	if (tokens != NULL)
-		free(tokens);
-}*/
-
-void	run_token_commands(t_token *token)
-{
-	int	i;
-//	int	fd;
-//	int	pid;
-
-	i = 0;
-/*	if (found_redirect)
-	{
-		pid = fork();
-		if (pid == 0)
-		{
-			fd = check_redirect2();
-			dup2(fd, STDIN_FILENO);
-		}
-		else
-		{
-		}
-	}*/
-	while (token[i].value)
-	{
-		printf("found a token\n");
-		printf("value = %s\n", token[i].value);
-		if (token[i].type)
-			printf("type = %d\n", token[i].type);
-		i++;
-	}
+	return (count + 1);
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
 	int		check;
 	t_var	variables;
 	t_token	*tokens;
+	t_token	***token_groups;
 
+	(void)argc; //It seems we are suposed to ignore additional
+	(void)argv; //arguments when we run the minishell
 	check = 0;
-	initialise(&variables);
 	init_signal();
 	while (1)
 	{
+		initialise(&variables);
 		variables.input = readline("prompt = ");
 		if (variables.input == NULL)
 		{
 			//printf("caught EOF\n");
 			//input = ft_strdup("EOF"); // temporary solution to ctrl-D
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 		check = parse(&variables); //return -1 for invalid, 1 for exit, 0 for valid
 		if (check == -1)
@@ -91,21 +67,31 @@ int	main(void)
 		if (!tokens)
 			return (1);
 		tokenize_cmd_list(&variables, tokens);
-//		if (check_command_syntax(tokens) == 1)
-			//do not execute
-		run_token_commands(tokens);
+		token_groups = split_tokens(&variables, tokens);
+//for testing:		run_command(token_groups[0][0]->value, &variables, token_groups[0]);
+//		execute_cmd_tok(&variables, token_groups[0]);
+		if (variables.pipes == 0)
+		{
+			if (run_command(variables.cmd_list[0], &variables, token_groups[0]) == 1)
+				exit(EXIT_SUCCESS);
+		}
+		//else
+		//	execute_pipes(&variables, token_groups);
+		else
+		{
+			variables.nb_cmd = count_cmd(variables.cmd_list);
+			handle_pipe(token_groups, variables.nb_cmd, &variables);
+		}
 		if (variables.input)
 		{
 			add_history(variables.input);
 			free(variables.input);
-			//free_var_token(&variables, &tokens);
 		}
-		if (check == 1)
+		if (check == 1 || variables.status == 1)
 		{
 			rl_clear_history();
 			break ;
 		}
 	}
-	//free_var_token(&variables, &tokens);
 	return (0);
 }

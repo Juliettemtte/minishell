@@ -1,11 +1,10 @@
 Left to do:
--Complete tokenisation logic
 -Learn how everything works
--Pipes
+-Full implementation of pipes
 -$?
-- <
+-<< needs significant improvements
 -Launching executables
--Complete parsing logic
+-Make sure the parsing doesn't let any error cases through || |
 -Clean up the code
 
 
@@ -14,18 +13,28 @@ Kind of working for now:
 -Working history
 -Handle quotes
 -Handle ctrl-C, -D, and -\
+-Tokenisation
 -cd
 -echo -n
 -pwd
 -exit
 -env
-- > >> (only works for echo and pwd)
-- <<
+- <  > >> (probably works now?)
 - unset
 - export & export ARG
 
 
 Some thoughts of the day:
+
+cat < test.txt | grep "hi"
+Redirection passes the content of test.txt to cat as an input, output from
+cat goes to pipe, grep receives it as input and searches for "hi".
+
+Redirections should probably occur during the pipeline rather than the 
+individual commands, testing ways to do this.
+
+Need to parse redirections without spaces.
+echo<test.txt
 
 echo a > test.txt 1 > test2.txt
 results in "a 1" being written in both .txt files

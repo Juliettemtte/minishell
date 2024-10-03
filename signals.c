@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 14:26:15 by arissane          #+#    #+#             */
-/*   Updated: 2024/09/17 16:31:03 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/02 15:58:20 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@ static void	handle_signal(int sig)
 	}
 }
 
-static void	disable_control_chars()
+static void	disable_control_chars(void)
 {
-	struct termios termios_p;
+	struct termios	termios_p;
 
 	tcgetattr(STDIN_FILENO, &termios_p); //take the current terminal settings and stores them in the struct
 	termios_p.c_lflag &= ~(ECHOCTL); // clears the ECHOCTL flag -> the terminal will no longer display control characters
