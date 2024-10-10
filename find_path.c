@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 14:57:00 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/02 16:00:24 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/09 13:50:45 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,8 @@ char	*find_cmd_path(char *cmd)
 	int		i;
 
 	full_path = find_path();
+	if (full_path == NULL)
+		return (NULL);
 	i = 0;
 	while (full_path[i] != NULL)
 	{

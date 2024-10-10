@@ -5,104 +5,91 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/30 12:15:50 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/03 13:32:49 by jmouette         ###   ########.fr       */
+/*   Created: 2024/10/09 10:05:12 by arissane          #+#    #+#             */
+/*   Updated: 2024/10/10 17:03:04 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	execute_cmd_tok(t_var *var, t_token **tokens)
+int	handle_exec_errors(char *command)
 {
-	int	i;
-/*
-	i = 0;
-	printf("\nfound tokens :\n");
-	while (tokens[i]->value)
+	int	error_code;
+
+	error_code = 0;
+	if ((command[0] == '.' && command[1] == '/') || command[0] == '/')
 	{
-		printf("token = %s\ntype = %d\n", tokens[i]->value, tokens[i]->type);
-		i++;
-	}
-	write(1, "\n", 1);
-	printf("pipes: %d\ncommands: %d\n", var->pipes, var->commands);
-*/
-
-	int	std_in;
-	int	std_out;
-	int	fd;
-	int	check;
-
-	std_in = dup(STDIN_FILENO);
-	std_out = dup(STDOUT_FILENO);
-	check = 0;
-
-	int	k = 0;
-	i = 0;
-	while (tokens[i])
-	{
-		if (tokens[i]->type > 4)//check redirects
-			k++;
-		i++;
-	}
-
-	//if (k == 0)
-	//	var->status = run_command(tokens[0]->value, var, tokens);
-	//else
-	if (k > 0)
-	{
-		printf("redirecting...\n var->is_redirect == %d\n", var->is_redirect);
-		i = 0;
-		while (tokens[i] && var->status != 1)
+		if (errno == EISDIR || errno == EACCES)
 		{
-			if (tokens[i]->type == REDIRECTION_LEFT)
-			{
-				fd = open(tokens[i - 1]->value, O_RDONLY);
-				if (fd < 0)
-				{
-					perror("Can't open file for reading");
-					break ;
-				}
-				dup2(fd, STDIN_FILENO);
-				close(fd);
-				check = 1;
-			}
-			if (tokens[i]->type == REDIRECTION_RIGHT)
-			{
-				fd = open(tokens[i + 1]->value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-				if (fd < 0)
-				{
-					perror("Can't open file for writing");
-					break ;
-				}
-				dup2(fd, STDOUT_FILENO);
-				close(fd);
-				check = 1;
-			}
-			if (tokens[i]->type == APPEND)
-			{
-				fd = open(tokens[i + 1]->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
-				if (fd < 0)
-				{
-					perror("Can't open file for appending");
-					break ;
-				}
-				dup2(fd, STDOUT_FILENO);
-				close(fd);
-				check = 1;
-			}
-			i++;
-			if (check == 1)
-				var->status = run_command(tokens[0]->value, var, tokens);
-			check = 0;
+			error_code = 126;
+			if (access(command, R_OK | W_OK | X_OK) != 0)
+				ft_putstr_fd(" Permission denied\n", 2);
+			else
+				ft_putstr_fd(" Is a directory\n", 2);
 		}
-		//restore original stdin, stdout
-		dup2(std_in, STDIN_FILENO);
-		dup2(std_out, STDOUT_FILENO);
-		close (std_in);
-		close (std_out);
+		else if (errno == ENOENT)
+		{
+			error_code = 127;
+			ft_putstr_fd(" No such file or directory\n", 2);
+		}
+	}
+	else
+	{
+		error_code = 127;
+		ft_putstr_fd(" command not found\n", 2);
+	}
+	return (error_code);
+}
+
+int	execve_args(t_token **token, char *cmd_path)
+{
+	int		size;
+	int		j;
+	char	**args;
+
+	size = 0;
+	while (token[size])
+		size++;
+	args = (char **)malloc(sizeof(char *) * (size + 1));
+	if (!args)
+		return (1);
+	j = 0;
+	while (token[j] && (token[j]->type == 2 || token[j]->type == 1))
+	{
+		args[j] = token[j]->value;
+		j++;
+	}
+	args[j] = NULL;
+	if (execve(cmd_path, args, environ) == -1)
+	{
+		free(args);
+		perror("command not found");
+		return (errno);
+	}
+	free (args);
+	return (0);
+}
+
+int	execute_command(t_token **token_group)
+{
+	char	*cmd_path;
+	char	**args;
+	char	*command;
+
+	args = NULL;
+	command = token_group[0]->value;
+	cmd_path = find_cmd_path(command);
+	if (!cmd_path)
+	{
+		if (execve(command, args, environ) == -1)
+			return (handle_exec_errors(command));
+		return (0);
+	}
+	if (!execve_args(token_group, cmd_path))
+	{
+		free(cmd_path);
 		return (1);
 	}
-	close (std_in);
-	close (std_out);
+	free(cmd_path);
 	return (0);
 }

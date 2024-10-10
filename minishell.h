@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/03 17:26:34 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/10 17:38:16 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <termios.h>
 # include <stdbool.h>
 # include <sys/wait.h>
+# include <errno.h>
 
 extern char	**environ;
 
@@ -67,15 +68,11 @@ typedef struct s_var
 	int			is_redirect;
 	int			commands;
 	int			pipes;
-	int			status;
+	int			exit_code;
 	int			nb_cmd;
 }	t_var;
 
 /*************** main ****************/
-
-/*************** check ***************/
-int		check_quotes(char *input);
-int		check_format(char *arg);
 
 /************** signal ***************/
 void	init_signal(void);
@@ -88,7 +85,6 @@ char	*find_cmd_path(char *cmd);
 
 /*************** pipes ***************/
 void	handle_pipe(t_token **commands[], int num_commands, t_var *var);
-void	execute_pipes(t_var *var, t_token ***token_groups);
 
 /************ split_input ************/
 char	**split_input(char const *s, char c);
@@ -103,34 +99,40 @@ int		redirectreplace_output_right(char *target);
 int		redirect_output_right(char *target);
 int		check_redirect(char **cmd_list);
 
-/************* builtins **************/
-int		handle_cd(t_token **token_group);
-void	handle_env(void);
-void	handle_export(char *name, char *value);
-int		handle_unset(char *name, size_t name_len);
-void	print_env_sorted(void);
-int		my_exit(char **arg);
-
-/************ builtins2 **************/
-int		handle_heredoc(t_var *var);
-int		handle_pwd(t_var *var);
-int		handle_echo(t_token **token_group);
-
 /************* commands ***************/
-int		run_command(char *cmd, t_var *var, t_token **token_group);
+int		run_command(t_var *var, t_token **token_group);
 
-/*************split_tokens*************/
+/************* execute ****************/
+int		execute_command(t_token **command_tokens);
+
+/*********** split_tokens *************/
 t_token	***split_tokens(t_var *var, t_token *tokens);
 
 /************* free_shell *************/
 void	free_list(char **list);
-void	free_command(char ***commands, int nb_cmd);
+void	free_command(char ***commands);
+void	free_token_groups(t_token ***token_groups);
 
 /*************** tokens ***************/
 void	tokenize_cmd_list(t_var *var, t_token *tokens);
 int		count_cmd_list(char **cmd_list);
 
-/************* execute ****************/
-int		execute_cmd_tok(t_var *var, t_token **tokens);
+/*********** redirections *************/
+int		handle_redirect(t_var *var, t_token **tokens);
+
+/************* builtins ***************/
+int		handle_cd(t_token **token_group);
+int		handle_env(void);
+int		handle_export(t_token **token_group);
+int		unset(char *name, size_t name_len);
+int		handle_unset(t_token **token);
+int		print_env_sorted(void);
+int		my_exit(t_token **arg);
+int		handle_heredoc(t_var *var);
+int		handle_pwd(t_var *var);
+int		handle_echo(t_token **token_group);
+
+/********** builtins_utils ************/
+int		find_command_index(t_token **tokens, const char *command);
 
 #endif

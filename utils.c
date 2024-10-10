@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 16:22:51 by jmouette          #+#    #+#             */
-/*   Updated: 2024/09/30 11:53:42 by arissane         ###   ########.fr       */
+/*   Updated: 2024/10/09 17:40:05 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,21 @@ int	ft_strcmp(const char *s1, const char *s2)
 	return (0);
 }
 
+static int	is_builtins2(char *cmd)
+{
+	if (ft_strcmp(cmd, "|") == 0)
+		return (9);
+	if (ft_strcmp(cmd, "<<") == 0)
+		return (10);
+	if (ft_strcmp(cmd, ">") == 0)
+		return (11);
+	if (ft_strcmp(cmd, "<") == 0)
+		return (12);
+	if (ft_strcmp(cmd, ">>") == 0)
+		return (13);
+	return (0);
+}
+
 int	is_builtins(char *cmd)
 {
 	if (ft_strcmp(cmd, "exit") == 0)
@@ -73,15 +88,5 @@ int	is_builtins(char *cmd)
 		return (7);
 	if (ft_strcmp(cmd, "unset") == 0)
 		return (8);
-	if (ft_strcmp(cmd, "|") == 0)
-		return (9);
-	if (ft_strcmp(cmd, "<<") == 0)
-		return (10);
-	if (ft_strcmp(cmd, ">") == 0)
-		return (11);
-	if (ft_strcmp(cmd, "<") == 0)
-		return (12);
-	if (ft_strcmp(cmd, ">>") == 0)
-		return (13);
-	return (0);
+	return (is_builtins2(cmd));
 }

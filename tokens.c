@@ -6,34 +6,11 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 17:13:54 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/02 16:00:08 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/09 17:40:33 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-/*
-void print_token_type(t_token_type type) {
-    switch (type) {
-        case COMMAND:           printf("COMMAND"); break;
-        case ARGUMENT:          printf("ARGUMENT"); break;
-        case OPTION:         	printf("OPTION"); break;
-        case PIPE:              printf("PIPE"); break;
-        case REDIRECTION_LEFT:    printf("REDIRECTION_LEFT"); break;
-        case REDIRECTION_RIGHT:   printf("REDIRECTION_RIGHT"); break;
-        case APPEND:		printf("APPEND"); break;
-        case HEREDOC:           printf("HEREDOC"); break;
-        default:                printf("UNKNOWN"); break;
-    }
-}
-
-void print_tokens(t_token *tokens) {
-    int i = 0;
-    while (tokens[i].value != NULL) {
-        print_token_type(tokens[i].type);
-        printf(": %s\n", tokens[i].value);
-        i++;
-    }
-}*/
 
 int	count_cmd_list(char **cmd_list)
 {
@@ -51,8 +28,6 @@ static void	create_token(char *cmd_part, t_token *tokens)
 {
 	if (!cmd_part)
 		return ;
-//	if (cmd_part[0] == '-')
-//		tokens->type = OPTION;
 	else if (is_builtins(cmd_part) == 9)
 		tokens->type = PIPE;
 	else if (is_builtins(cmd_part) == 11)
@@ -63,7 +38,7 @@ static void	create_token(char *cmd_part, t_token *tokens)
 		tokens->type = REDIRECTION_LEFT;
 	else if (is_builtins(cmd_part) == 10)
 		tokens->type = HEREDOC;
-	else if (find_cmd_path(cmd_part) != NULL || is_builtins(cmd_part) != 0)
+	else if (is_builtins(cmd_part) != 0 || find_cmd_path(cmd_part) != NULL )
 		tokens->type = COMMAND;
 	else
 		tokens->type = ARGUMENT;
@@ -84,7 +59,5 @@ void	tokenize_cmd_list(t_var *var, t_token *tokens)
 			var->commands++;
 		i++;
 	}
-	//free_list(var->cmd_list);
 	tokens[i].value = NULL;
-//	print_tokens(tokens);
 }

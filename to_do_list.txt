@@ -1,7 +1,7 @@
 Left to do:
 -Learn how everything works
--Full implementation of pipes
 -$?
+-exit codes
 -<< needs significant improvements
 -Launching executables
 -Make sure the parsing doesn't let any error cases through || |
@@ -14,6 +14,7 @@ Kind of working for now:
 -Handle quotes
 -Handle ctrl-C, -D, and -\
 -Tokenisation
+-pipes
 -cd
 -echo -n
 -pwd
@@ -25,6 +26,15 @@ Kind of working for now:
 
 
 Some thoughts of the day:
+
+Exit codes:
+0 success
+1 command failed
+126 you dont have the permission
+127 command doesn't exist
+127 + signal:  a signal Killed or interrupted the command
+2 error parsing
+error fd = 2
 
 cat < test.txt | grep "hi"
 Redirection passes the content of test.txt to cat as an input, output from

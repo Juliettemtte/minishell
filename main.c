@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:42:58 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/03 17:23:23 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/10 17:38:30 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ static void	initialise(t_var *variables)
 	variables->heredoc = ft_strdup("");
 	variables->commands = 0;
 	variables->pipes = 0;
-	variables->status = 0;
 	variables->is_redirect = 0;
 }
 
@@ -42,6 +41,7 @@ static int	count_cmd(char **cmd_list)
 int	main(int argc, char **argv)
 {
 	int		check;
+	int		exit_code;
 	t_var	variables;
 	t_token	*tokens;
 	t_token	***token_groups;
@@ -60,7 +60,8 @@ int	main(int argc, char **argv)
 			//input = ft_strdup("EOF"); // temporary solution to ctrl-D
 			exit(EXIT_FAILURE);
 		}
-		check = parse(&variables); //return -1 for invalid, 1 for exit, 0 for valid
+		add_history(variables.input);
+		check = parse(&variables); //return -1 for invalid, -2 for exit, 0 for valid
 		if (check == -1)
 			printf("invalid input\n");
 		tokens = malloc(sizeof(t_token) * (count_cmd_list(variables.cmd_list) + 1));
@@ -70,28 +71,34 @@ int	main(int argc, char **argv)
 		token_groups = split_tokens(&variables, tokens);
 //for testing:		run_command(token_groups[0][0]->value, &variables, token_groups[0]);
 //		execute_cmd_tok(&variables, token_groups[0]);
-		if (variables.pipes == 0)
+		if (variables.pipes == 0 && variables.is_redirect == 0)
 		{
-			if (run_command(variables.cmd_list[0], &variables, token_groups[0]) == 1)
-				exit(EXIT_SUCCESS);
+			check = run_command(&variables, token_groups[0]);
+			variables.exit_code = check;
 		}
-		//else
-		//	execute_pipes(&variables, token_groups);
 		else
 		{
 			variables.nb_cmd = count_cmd(variables.cmd_list);
 			handle_pipe(token_groups, variables.nb_cmd, &variables);
 		}
 		if (variables.input)
-		{
-			add_history(variables.input);
 			free(variables.input);
+		if (token_groups)
+		{
+			if (check == -2 || variables.exit_code == -2)
+				exit_code = my_exit(token_groups[0]);
+			free_token_groups(token_groups);
 		}
-		if (check == 1 || variables.status == 1)
+		if (variables.cmd_list)
+			free_list(variables.cmd_list);
+		if (check == -2 || variables.exit_code == -2)
 		{
 			rl_clear_history();
 			break ;
 		}
 	}
+	if (variables.heredoc)
+		free(variables.heredoc);
+	exit (exit_code);
 	return (0);
 }

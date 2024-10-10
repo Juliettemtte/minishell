@@ -6,115 +6,143 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 15:55:28 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/03 17:27:01 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/10 16:37:29 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	is_valid_identifier(const char *arg)
+char	*get_env_value(t_var *var, char *str, int i)
 {
-	if (!arg || (!ft_isalpha(arg[0]) && arg[0] != '_'))
-		exit(EXIT_FAILURE);
-	for (int i = 1; arg[i] != '\0'; i++)
-		if (!ft_isalnum(arg[i]) && arg[i] != '_')
-			exit(EXIT_FAILURE);
-	return (0);
-}
+	char	*value;
+	char	*temp;
+	int		j;
+	int		k;
+	int		end;
+	size_t		len;
 
-static char	**is_valid(t_var *var)
-{
-	int		i;
-	char	*equal_sign;
-	char	*cmd;
-
-	i = 0;
-	while (var->cmd_list[i] != NULL)
+	temp = NULL;
+	if (str[i + 1] == '?')
 	{
-		cmd = var->cmd_list[i];
-		if (ft_strcmp(cmd, "export") == 0 || ft_strcmp(cmd, "unset") == 0)
-		{
-			i++;
-			continue;
-		}
-		if (!is_valid_identifier(cmd))
-			exit(0);
-		equal_sign = ft_strchr(cmd, '=');
-		if (equal_sign)
-		{
-			*equal_sign = '\0';
-			return ft_split(cmd, '=');
-		}
-		else
-			return ft_split(cmd, '=');
-	}
-	return (NULL);
-}
-
-static int	no_redirect(t_var *var)
-{
-	char	*path;
-	pid_t	pid;
-	int		status;
-
-	pid = fork();
-	if (pid == -1)
-		return (-1);
-	else if (pid == 0)
-	{
-		path = find_cmd_path(var->cmd_list[0]);
-		if (!path)
-			exit(EXIT_FAILURE);
-		if (execve(path, var->cmd_list, environ) == -1)
-		{
-			free (path);
-			exit(EXIT_FAILURE);
-		}
-		free(path);
-		exit(EXIT_SUCCESS);
+		value = ft_itoa(var->exit_code);
+		if (!value)
+			return (NULL);
+		end = i + 2;
 	}
 	else
-		waitpid(pid, &status, 0);
-	return (0);
-}
-
-static int	run_command2(char *cmd, t_var *var)
-{
-	char	**value;
-
-	if (is_builtins(cmd) == 7)
 	{
-		if (!var->cmd_list[1])
-			print_env_sorted();
-		else
-		{
-			value = is_valid(var);
-			if (!value)
-				exit(EXIT_FAILURE);
-			handle_export(value[0], value[1]);
-			free_list(value);
-		}
-		exit(EXIT_SUCCESS);
-	}
-	else if (is_builtins(cmd) == 8)
-	{
-		value = is_valid(var);
+		end = i + 1;
+		while (str[end] && str[end] != ' ' &&
+				str[end] != '\"' && str[end] != '\'')
+			end++;
+		temp = ft_substr(str, i + 1, end - (i + 1));
+		value = getenv(temp);
+		free(temp);
 		if (!value)
-			exit(EXIT_FAILURE);
-		handle_unset(value[0], ft_strlen(value[0]));
-		free_list(value);
-		exit(EXIT_SUCCESS);
+			return (NULL);
 	}
-	else if (var->is_redirect == 0)
-		if (no_redirect(var) == -1)
-			return (-1);
-	return (2);
+	len = ft_strlen(str) - (end - i) + ft_strlen(value);
+	temp = malloc(sizeof(char) * (len + 1));
+	if (!temp)
+		return (NULL);
+	k = 0;
+	while (k < i)
+	{
+		temp[k] = str[k];
+		k++;
+	}
+	k = 0;
+	j = i;
+	while (value[k])
+	{
+		temp[j] = value[k];
+		j++;
+		k++;
+	}
+	while (str[end])
+		temp[j++] = str[end++];
+	temp[j] = '\0';
+	free(str);
+	return (temp);
 }
 
-int	run_command(char *cmd, t_var *var, t_token **token_group)
+char	*remove_quotes(t_var *var, char *str)
 {
+	int	i;
+	int	k;
+	char	c;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == '\'')
+		{
+			while (str[i + 1] != '\'')
+				i++;
+			i += 2;
+		}
+		if (str[i] == '$' && str[i + 1])
+		{
+			str = get_env_value(var, str, i);
+		}
+		i++;
+	}
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == '\"' || str[i] == '\'')
+		{
+			c = str[i];
+			k = i + 1;
+			while (str[k])
+			{
+				if (str[k] == c)
+				{
+					while (i < k - 1)
+					{
+						str[i] = str[i + 1];
+						i++;
+					}
+					k++;
+					while (str[k])
+					{
+						str[i] = str[k];
+						i++;
+						k++;
+					}
+					str[i] = '\0';
+					break ;
+				}
+				k++;
+			}
+		}
+		i++;
+	}
+	return (str);
+}
+
+void	check_characters(t_var *var, t_token **token_group)
+{
+	int	i;
+
+	i = 0;
+	while (token_group[i])
+	{
+		token_group[i]->value = remove_quotes(var, token_group[i]->value);
+		i++;
+	}
+}
+
+int	run_command(t_var *var, t_token **token_group)
+{
+	char	*cmd;
+
+	if (!token_group)//this happens if you only press enter
+		return (0);
+	check_characters(var, token_group);
+	cmd = token_group[0]->value;
 	if (is_builtins(cmd) == 1)
-		return (my_exit((char **)token_group));
+		return (-2);
 	if (is_builtins(cmd) == 2)
 		return (0);
 	if (is_builtins(cmd) == 9)
@@ -124,11 +152,12 @@ int	run_command(char *cmd, t_var *var, t_token **token_group)
 	if (is_builtins(cmd) == 4)
 		return (handle_echo(token_group));
 	if (is_builtins(cmd) == 5)
-		return(handle_cd(token_group));
-	else if (is_builtins(cmd) == 6)
-	{
-		handle_env();
-		exit(EXIT_SUCCESS);
-	}
-	return (run_command2(cmd, var));
+		return (handle_cd(token_group));
+	if (is_builtins(cmd) == 6)
+		return (handle_env());
+	if (is_builtins(cmd) == 7)
+		return(handle_export(token_group));
+	if (is_builtins(cmd) == 8)
+		return (handle_unset(token_group));
+	return (execute_command(token_group));
 }

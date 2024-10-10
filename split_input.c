@@ -6,84 +6,129 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 10:40:11 by arissane          #+#    #+#             */
-/*   Updated: 2024/09/10 16:28:24 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/09 17:49:31 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	count_words(char const *s, char c)
+static int	count_words(char const *str, char c)
 {
+	int	i;
 	int	count;
 
+	i = 0;
 	count = 0;
-	while (*s && s)
+	while (str[i])
 	{
-		if (*s == '"' || *s == '\'')
+		if (str[i] == '\"')
 		{
-			s++;
-			while (*s && *s != '"' && *s != '\'')
-			{
-				s++;
-				if (*s == '$')
-					count++;
-			}
+			i++;
+			while (str[i] && str[i] != '\"')
+				i++;
+			if (str[i] == '\"')
+				i++;
 			count++;
 		}
-		else if (*s != c)
+		else if (str[i] == '\'')
+		{
+			i++;
+			while (str[i] && str[i] != '\'')
+				i++;
+			if (str[i] == '\'')
+				i++;
+			count++;
+		}
+		else if (str[i] != c)
 		{
 			count++;
-			while (*s && *s != c)
-				s++;
+			while (str[i] && str[i] != c)
+				i++;
 		}
 		else
-			s++;
+			i++;
 	}
+
 	return (count);
 }
 
-static void	*free_array(char ***result, int i)
+static void	free_array(char **array)
 {
-	while (--i >= 0)
+	int	i;
+
+	i = 0;
+	while (array[i])
 	{
-		free((*result)[i]);
-		(*result)[i] = NULL;
+		free(array[i]);
+		i++;
 	}
-	free(*result);
-	(*result) = NULL;
-	return (0);
+	free(array);
 }
 
 char	**split_input(char const *s, char c)
 {
 	char		**result;
-	int			i;
 	const char	*start;
+	size_t		sub_len;
+	int			i;
+	int			inside_quotes;
 
-	result = (char **)malloc((count_words(s, c) + 1) * sizeof(char *));
-	i = 0;
+	i = count_words(s, c);
+	result = (char **)malloc((i + 1) * sizeof(char *));
 	if (!result)
-		return (0);
+		return (NULL);
+	i = 0;
 	while (*s)
 	{
 		if (*s != c)
 		{
 			start = s;
-			if (*s == '"' || *s == '\'')
+			if (*s == '\"')
 			{
 				s++;
-				while (*s && *s != '"' && *s != '\'' && *s != '$')
+				while (*s && *s != '\"')
+					s++;
+				if (*s == '\"')
+					s++;
+			}
+			if (*s == '\'')
+			{
+				s++;
+				while (*s && *s != '\'')
+					s++;
+				if (*s == '\'')
 					s++;
 			}
 			else
-				while (*s && *s != c)
-					s++;
-			result[i] = ft_substr(start, 0, s - start);
+			{
+			    inside_quotes = 0;
+			    while (*s)
+				{
+			        if (*s == '\"' || *s == '\'')
+			            inside_quotes = !inside_quotes;
+			        if (*s == c && !inside_quotes)
+			            break;
+			        s++;
+			    }
+			}
+			sub_len = s - start;
+			//remove surrounding quotes
+			//if ((start[0] == '\"' && start[sub_len - 1] == '\"') ||
+			//		(start[0] == '\'' && start[sub_len - 1] == '\''))
+			//{
+			//	start++;
+			//	sub_len += -2;
+			//}
+			result[i] = ft_substr(start, 0, sub_len);
 			if (result[i] == NULL)
-				return (free_array(&result, i));
+			{
+				free_array(result);
+				return (NULL);
+			}
 			i++;
 		}
-		s++;
+		else
+			s++;
 	}
 	result[i] = 0;
 	return (result);

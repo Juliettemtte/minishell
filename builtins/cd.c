@@ -6,34 +6,62 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 15:25:42 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/03 17:09:03 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/09 17:41:20 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
+void	export_cd(char *name, char *value)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+	char	*new_var;
+	char	**new_environ;
+
+	value = ft_strtrim(value, "\"");
+	tmp = ft_strjoin(name, "=");
+	new_var = ft_strjoin(tmp, value);
+	free(tmp);
+	free(value);
+	i = unset(name, ft_strlen(name));
+	new_environ = malloc((i + 2) * sizeof(char *));
+	if (new_environ == NULL)
+	{
+		free(new_var);
+		return ;
+	}
+	j = -1;
+	while (j++ < i)
+		new_environ[j] = environ[j];
+	new_environ[i] = new_var;
+	new_environ[i + 1] = NULL;
+	environ = new_environ;
+}
+
 static int	check_cd(t_token **token, int i, char **new_path)
 {
-	if (!token[i + 1] || is_builtins(token[i + 1]->value) != 0)
+	if (!token[i] || is_builtins(token[i]->value) != 0)
 	{
 		*new_path = getenv("HOME");
 		if (!(*new_path))
 			return (1);
 		return (2);
 	}
-	if (access(token[i + 1]->value, F_OK) != 0)
+	else if (access(token[i]->value, F_OK) != 0 && token[i]->value[0] != '$')
 	{
-		printf("cd: %s: No such file or directory\n", token[i + 1]->value);
+		ft_putstr_fd("cd: No such file or directory\n", 2);
 		return (1);
 	}
-	if (token[i + 2] && token[i + 2]->type == 2)
+	else if (token[i + 1] && token[i + 1]->type == 2)
 	{
-		printf("cd: too many arguments\n");
+		ft_putstr_fd("cd: too many arguments\n", 2);
 		return (1);
 	}
-	if (token[i + 1]->value[0] == '$')
+	else if (token[i]->value[0] == '$')
 	{
-		*new_path = getenv(token[i + 1]->value + 1);
+		*new_path = getenv(token[i]->value + 1);
 		if (!(*new_path))
 			return (1);
 		return (2);
@@ -43,37 +71,28 @@ static int	check_cd(t_token **token, int i, char **new_path)
 
 int	handle_cd(t_token **token_group)
 {
-	char	new_cwd[260]; //260 = MAX_PATH
+	char	new_cwd[260];
 	char	old_path[260];
 	char	*new_path;
 	int		i;
 	int		result;
 
 	if (!getcwd(old_path, sizeof(old_path)))
-		exit(EXIT_FAILURE);
-	i = 0;
-	while (token_group[i] && token_group[i]->value)
-	{
-		if (is_builtins(token_group[i]->value) == 6)
-			break ;
-		i++;
-	}
-	result = check_cd(token_group, i, &new_path);
-	if (result == 1)
-		exit(EXIT_FAILURE);
-	else if (result == 0)
+		return (1);
+	i = find_command_index(token_group, "cd");
+	result = check_cd(token_group, i + 1, &new_path);
+	if (result == 0)
 		new_path = token_group[i + 1]->value;
+	else if (result == 1)
+		return (1);
 	if (new_path && chdir(new_path) == 0)
 	{
 		if (!getcwd(new_cwd, sizeof(new_cwd)))
-			exit(EXIT_FAILURE);
-		handle_export("OLDPWD", old_path);
-		handle_export("PWD", new_cwd);
+			return (1);
+		export_cd("OLDPWD", old_path);
+		export_cd("PWD", new_cwd);
 	}
 	else
-	{
-		printf("cd: %s: No such file or directory\n", new_path);
-		exit(EXIT_FAILURE);
-	}
+		return (1);
 	return (0);
 }

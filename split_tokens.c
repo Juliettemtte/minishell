@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 09:35:42 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/03 09:59:53 by arissane         ###   ########.fr       */
+/*   Updated: 2024/10/09 10:47:42 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,31 +31,6 @@
 	}
 	printf("\n");
 }*/
-
-void	free_token_groups(t_token ***token_groups, int group_count)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	j = 0;
-	while (i < group_count)
-	{
-		if (token_groups[i])
-		{
-			j = 0;
-			while (token_groups[i][j])
-			{
-				free(token_groups[i][j]->value);
-				free(token_groups[i][j]);
-				j++;
-			}
-			free(token_groups[i]);
-		}
-		i++;
-	}
-	free(token_groups);
-}
 
 t_token	*copy_token(t_token *token)
 {
@@ -95,7 +70,7 @@ t_token	***split_tokens(t_var *var, t_token *tokens)
 			token_groups[group_index] = malloc(sizeof(t_token *) * (i - k + 1));
 			if (!token_groups[group_index])
 			{
-				free_token_groups(token_groups, group_index);
+				free_token_groups(token_groups);
 				return (NULL);
 			}
 			j = 0;
@@ -104,7 +79,7 @@ t_token	***split_tokens(t_var *var, t_token *tokens)
 				token_groups[group_index][j] = copy_token(&tokens[k]);
 				if (!token_groups[group_index][j])
 				{
-					free_token_groups(token_groups, group_index);
+					free_token_groups(token_groups);
 					return (NULL);
 				}
 				k++;
@@ -122,7 +97,7 @@ t_token	***split_tokens(t_var *var, t_token *tokens)
 		token_groups[group_index] = malloc(sizeof(t_token *) * (i - k + 1));
 		if (!token_groups[group_index])
 		{
-			free_token_groups(token_groups, group_index);
+			free_token_groups(token_groups);
 			return (NULL);
 		}
 		j = 0;
@@ -131,7 +106,7 @@ t_token	***split_tokens(t_var *var, t_token *tokens)
 			token_groups[group_index][j] = copy_token(&tokens[k]);
 			if (!token_groups[group_index][j])
 			{
-				free_token_groups(token_groups, group_index);
+				free_token_groups(token_groups);
 				return (NULL);
 			}
 			k++;
@@ -141,6 +116,6 @@ t_token	***split_tokens(t_var *var, t_token *tokens)
 		group_index++;
 	}
 	token_groups[group_index] = NULL;
-	//print_token_groups(token_groups);
+//	print_token_groups(token_groups);
 	return (token_groups);
 }

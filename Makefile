@@ -6,7 +6,7 @@
 #    By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/03 11:23:04 by arissane          #+#    #+#              #
-#    Updated: 2024/10/03 17:19:02 by jmouette         ###   ########.fr        #
+#    Updated: 2024/10/10 17:26:15 by jmouette         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,10 +16,12 @@ CC = cc
 
 CFLAGS = -Wall -Werror -Wextra
 
-SRCS = main.c signals.c parse.c split_input.c builtins.c builtins2.c redirect.c\
-	utils.c pipes.c check.c free_shell.c commands.c find_path.c tokens.c\
-	execute.c split_tokens.c\
-	builtins/cd.c builtins/exit.c
+SRCS = main.c signals.c parse.c split_input.c redirect.c execute.c\
+	utils.c pipes.c free_shell.c commands.c find_path.c tokens.c\
+	redirections.c split_tokens.c\
+	builtins/builtins_utils.c builtins/cd.c builtins/exit.c builtins/export.c\
+	builtins/unset.c builtins/env.c builtins/echo.c builtins/pwd.c\
+	builtins/heredoc.c
 
 OFILES = $(SRCS:.c=.o)
 
@@ -29,13 +31,13 @@ LIBFT = $(LIBFT_DIR)/libft.a
 %.o: %.c
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-all: $(LIBFT) $(NAME)
+all: LIBFT $(NAME)
 
-$(LIBFT):
+LIBFT:
 	@make -C $(LIBFT_DIR)
 
-$(NAME): $(OFILES)
-	@$(CC) $(CFLAGS) $(OFILES) libft/libft.a -lreadline -o $(NAME)
+$(NAME): $(OFILES) $(LIBFT)
+	@$(CC) $(CFLAGS) $(OFILES) libft/libft.a -lreadline -o $(NAME) $(LIBFT)
 	@ echo "Minishell compiled"
 
 clean:
