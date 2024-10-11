@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 15:55:28 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/10 16:37:29 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/11 16:23:39 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,12 @@ char	*get_env_value(t_var *var, char *str, int i)
 	int		j;
 	int		k;
 	int		end;
-	size_t		len;
+	size_t	len;
 
 	temp = NULL;
 	if (str[i + 1] == '?')
 	{
 		value = ft_itoa(var->exit_code);
-		if (!value)
-			return (NULL);
 		end = i + 2;
 	}
 	else
@@ -38,9 +36,9 @@ char	*get_env_value(t_var *var, char *str, int i)
 		temp = ft_substr(str, i + 1, end - (i + 1));
 		value = getenv(temp);
 		free(temp);
-		if (!value)
-			return (NULL);
 	}
+	if (!value)
+		value = "";
 	len = ft_strlen(str) - (end - i) + ft_strlen(value);
 	temp = malloc(sizeof(char) * (len + 1));
 	if (!temp)
@@ -68,9 +66,11 @@ char	*get_env_value(t_var *var, char *str, int i)
 
 char	*remove_quotes(t_var *var, char *str)
 {
-	int	i;
-	int	k;
+	int		i;
+	int		j;
 	char	c;
+	int		depth;
+	int		outer_quote;
 
 	i = 0;
 	while (str[i])
@@ -81,42 +81,41 @@ char	*remove_quotes(t_var *var, char *str)
 				i++;
 			i += 2;
 		}
-		if (str[i] == '$' && str[i + 1])
+		if (str[i] == '$' && str[i + 1] && str[i + 1] != ' ' &&
+				str[i + 1] != '\"')
 		{
 			str = get_env_value(var, str, i);
 		}
 		i++;
 	}
 	i = 0;
+	j = 0;
+	depth = 0;
 	while (str[i])
 	{
 		if (str[i] == '\"' || str[i] == '\'')
 		{
 			c = str[i];
-			k = i + 1;
-			while (str[k])
+			if (depth == 0)
 			{
-				if (str[k] == c)
-				{
-					while (i < k - 1)
-					{
-						str[i] = str[i + 1];
-						i++;
-					}
-					k++;
-					while (str[k])
-					{
-						str[i] = str[k];
-						i++;
-						k++;
-					}
-					str[i] = '\0';
-					break ;
-				}
-				k++;
+				outer_quote = c;
+				depth++;
+				i++;
+				continue ;
+			}
+			else if (str[i] == outer_quote && depth == 1)
+			{
+				depth--;
+				i++;
+				continue ;
 			}
 		}
-		i++;
+		str[j++] = str[i++];
+	}
+	while (str[j])
+	{
+		str[j] = '\0';
+		j++;
 	}
 	return (str);
 }

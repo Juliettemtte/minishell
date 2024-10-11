@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:42:58 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/10 17:38:30 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:49:36 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ static void	initialise(t_var *variables)
 	variables->commands = 0;
 	variables->pipes = 0;
 	variables->is_redirect = 0;
+	variables->test = 0;
 }
 
 static int	count_cmd(char **cmd_list)
@@ -46,8 +47,8 @@ int	main(int argc, char **argv)
 	t_token	*tokens;
 	t_token	***token_groups;
 
-	(void)argc; //It seems we are suposed to ignore additional
-	(void)argv; //arguments when we run the minishell
+	(void)argc;
+	(void)argv;
 	check = 0;
 	init_signal();
 	while (1)
@@ -61,7 +62,7 @@ int	main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 		add_history(variables.input);
-		check = parse(&variables); //return -1 for invalid, -2 for exit, 0 for valid
+		check = parse(&variables);
 		if (check == -1)
 			printf("invalid input\n");
 		tokens = malloc(sizeof(t_token) * (count_cmd_list(variables.cmd_list) + 1));
@@ -69,13 +70,8 @@ int	main(int argc, char **argv)
 			return (1);
 		tokenize_cmd_list(&variables, tokens);
 		token_groups = split_tokens(&variables, tokens);
-//for testing:		run_command(token_groups[0][0]->value, &variables, token_groups[0]);
-//		execute_cmd_tok(&variables, token_groups[0]);
 		if (variables.pipes == 0 && variables.is_redirect == 0)
-		{
-			check = run_command(&variables, token_groups[0]);
-			variables.exit_code = check;
-		}
+			variables.exit_code = run_command(&variables, token_groups[0]);
 		else
 		{
 			variables.nb_cmd = count_cmd(variables.cmd_list);

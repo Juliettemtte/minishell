@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:49 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/09 17:41:36 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/11 15:48:33 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,7 @@ static char	*check_export(t_token **token, int i, char ***cmd)
 		free(value);
 		if (!temp)
 			return (NULL);
-		value = ft_strtrim(temp, "\"");
-		free(temp);
-		return (value);
+		return (temp);
 	}
 	else
 	{

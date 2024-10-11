@@ -6,19 +6,48 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:07 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/10 13:03:20 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/11 13:31:48 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+//check if an env pointer exists and return the len to skip over it if it does
+int	check_env(char *input, int i)
+{
+	int	j;
+	int	k;
+	int	len;
+	char	*temp;
+	char	*envp;
 
+	i++;
+	j = i;
+	k = 0;
+	len = 0;
+	while (input[j] && input[j] != ' ' && input[j] != '\"' && input[j] != '\'')
+	{
+		len++;
+		j++;
+	}
+	temp = malloc(sizeof(char) * (len + 1));
+	if (!temp)
+		return (0);
+	while (k < len)
+		temp[k++] = input[i++];
+	temp[len] = '\0';
+	envp = getenv(temp);
+	free(temp);
+	if (!envp)
+		return (len + 1);
+	return (0);
+}
+//splits the input string around redirections and removes invalid $ calls
 char	*split_redirections(char *input)
 {
 	int	i;
-//	int	j;
 	int	k;
+	int	len;
 	char	*str;
-//	char	*nb_str;
 
 	i = 0;
 	k = 0;
@@ -36,7 +65,15 @@ char	*split_redirections(char *input)
 	k = 0;
 	while (input[i])
 	{
-		if (input[i] == '\"' && input[i + 1] == '\"')
+		if (input[i] == '$' && input[i + 1] && input[i + 1] != '\"' && input[i + 1] != '\'' && input[i + 1] != ' ' && input[i + 1] != '?')
+		{
+			len = check_env(input, i);
+			if (len > 0)
+				i += len;
+			else
+				str[k++] = input[i++];
+		}
+		else if (input[i] == '\"' && input[i + 1] == '\"')
 			i += 2;
 		else if (input[i] == '\'' && input[i + 1] == '\'')
 			i += 2;
@@ -45,7 +82,16 @@ char	*split_redirections(char *input)
 			str[k++] = input[i++];
 			while (input[i] && input[i] != '\"')
 			{
-				str[k++] = input[i++];
+				if (input[i] == '$' && input[i + 1] && input[i + 1] != '?' && input[i + 1] != ' ' && input[i + 1] != '\"' && input[i + 1] != '\'')
+				{
+					len = (check_env(input, i));
+					if (len > 0)
+						i += len;
+					else
+						str[k++] = input[i++];
+				}
+				else
+					str[k++] = input[i++];
 			}
 			if (input[i] == '\"')
 			{
@@ -90,22 +136,13 @@ char	*split_redirections(char *input)
 			str[k++] = input[i++];
 			str[k++] = ' ';
 		}
-		/*else if (input[i] == '$' && input[i + 1] == '?')
-		{
-			j = 0;
-			nb_str = ft_itoa(var->exit_code);
-			while (nb_str[j])
-				str[k++] = nb_str[j++];
-			free(nb_str);
-			i += 2;
-		}*/
 		else
 			str[k++] = input[i++];
 	}
 	str[k] = '\0';
 	return (str);
 }
-
+//validates the input string and checks it's contents while splitting it into separate strings between spaces ready for tokenization
 int	parse(t_var *var)
 {
 	int		i;

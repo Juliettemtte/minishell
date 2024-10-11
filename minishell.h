@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/10 17:38:16 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/11 18:38:14 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ typedef struct s_var
 	int			pipes;
 	int			exit_code;
 	int			nb_cmd;
+	int			test;
 }	t_var;
 
 /*************** main ****************/
@@ -100,6 +101,7 @@ int		redirect_output_right(char *target);
 int		check_redirect(char **cmd_list);
 
 /************* commands ***************/
+void	check_characters(t_var *var, t_token **token_group);
 int		run_command(t_var *var, t_token **token_group);
 
 /************* execute ****************/
@@ -127,10 +129,12 @@ int		handle_export(t_token **token_group);
 int		unset(char *name, size_t name_len);
 int		handle_unset(t_token **token);
 int		print_env_sorted(void);
-int		my_exit(t_token **arg);
 int		handle_heredoc(t_var *var);
 int		handle_pwd(t_var *var);
 int		handle_echo(t_token **token_group);
+
+
+int		my_exit(t_token **token);
 
 /********** builtins_utils ************/
 int		find_command_index(t_token **tokens, const char *command);
