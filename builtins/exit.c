@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 17:14:20 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/11 18:33:07 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/19 16:16:46 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 long	get_numeric_exit_value(t_token **token, int i, int j, int is_neg)
 {
-	long exit_code;
+	long	exit_code;
 
 	exit_code = 0;
 	while (token[j]->value[i] != '\0')

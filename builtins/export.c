@@ -6,39 +6,36 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:49 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/11 15:48:33 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/19 16:34:47 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static int	is_valid_identifier(const char *arg)
+static char	*handle_equal_sign(t_token **token, char *str, char ***cmd, int i)
 {
-	int	i;
+	char	*temp;
+	char	*value;
 
-	i = 1;
-	if (!arg || (!ft_isalpha(arg[0]) && arg[0] != '_'))
-	{
-		ft_putstr_fd("export: not a valid identifier\n", 2);
-		return (1);
-	}
-	while (arg[i] != '\0' && arg[i] != '=')
-	{
-		if (!ft_isalnum(arg[i]) && arg[i] != '_')
-		{
-			ft_putstr_fd("export: not a valid identifier\n", 2);
-			return (1);
-		}
-		i++;
-	}
-	return (0);
+	*str = '\0';
+	(*cmd)[0] = ft_strdup(token[i]->value);
+	(*cmd)[1] = ft_strdup(str + 1);
+	if ((*cmd)[0] == NULL || (*cmd)[1] == NULL)
+		return (NULL);
+	value = ft_strjoin((*cmd)[0], "=");
+	if (!value)
+		return (NULL);
+	temp = ft_strjoin(value, (*cmd)[1]);
+	free(value);
+	if (!temp)
+		return (NULL);
+	return (temp);
 }
 
 static char	*check_export(t_token **token, int i, char ***cmd)
 {
 	char	*equal_sign;
 	char	*value;
-	char	*temp;
 
 	if (is_valid_identifier(token[i]->value))
 		return (NULL);
@@ -47,21 +44,7 @@ static char	*check_export(t_token **token, int i, char ***cmd)
 		return (NULL);
 	equal_sign = ft_strchr(token[i]->value, '=');
 	if (equal_sign)
-	{
-		*equal_sign = '\0';
-		(*cmd)[0] = ft_strdup(token[i]->value);
-		(*cmd)[1] = ft_strdup(equal_sign + 1);
-		if ((*cmd)[0] == NULL || (*cmd)[1] == NULL)
-			return (NULL);
-		value = ft_strjoin((*cmd)[0], "=");
-		if (!value)
-			return (NULL);
-		temp = ft_strjoin(value, (*cmd)[1]);
-		free(value);
-		if (!temp)
-			return (NULL);
-		return (temp);
-	}
+		return (handle_equal_sign(token, equal_sign, cmd, i));
 	else
 	{
 		(*cmd)[0] = ft_strdup(token[i]->value);
@@ -69,41 +52,59 @@ static char	*check_export(t_token **token, int i, char ***cmd)
 		value = ft_strjoin(*cmd[0], "=\'\'");
 		return (value);
 	}
+	free_command(cmd);
 	return (NULL);
 }
 
-int	handle_export(t_token **token_group)
+static int	set_environment_variable(char *name, const char *value, t_var *var)
+{
+	int		k;
+	int		j;
+	char	**new_environ;
+
+	k = unset(name, ft_strlen(name), var);
+	new_environ = malloc((k + 3) * sizeof(char *));
+	if (new_environ == NULL)
+		return (0);
+	j = 0;
+	while (j < k)
+	{
+		new_environ[j] = var->envp[j];
+		j++;
+	}
+	new_environ[k] = ft_strdup(name);
+	new_environ[k + 1] = ft_strdup(value);
+	new_environ[k + 2] = NULL;
+	var->envp = new_environ;
+	return (1);
+}
+
+static int	export_variable(t_token **token_group, int index, t_var *var)
+{
+	char	*new_var;
+	char	**cmd;
+
+	new_var = check_export(token_group, index, &cmd);
+	if (new_var == NULL)
+		return (0);
+	if (!set_environment_variable(cmd[0], new_var, var))
+		return (0);
+	free(new_var);
+	//free_list(cmd);
+	return (1);
+}
+
+int	handle_export(t_token **token_group, t_var *var)
 {
 	int		i;
-	int		j;
-	int		k;
-	char	*new_var;
-	char	**new_environ;
-	char	**cmd;
 
 	i = find_command_index(token_group, "export");
 	if (i == -1)
-		return (print_env_sorted());
+		return (print_env_sorted(var));
 	while (token_group[i + 1] && token_group[i + 1]->type == 2)
 	{
-		new_var = check_export(token_group, i + 1, &cmd);
-		if (new_var == NULL)
+		if (!export_variable(token_group, i + 1, var))
 			return (1);
-		k = unset(cmd[0], ft_strlen(cmd[0]));
-		new_environ = malloc((k + 2) * sizeof(char *));
-		if (new_environ == NULL)
-		{
-			free(new_var);
-			return (1);
-		}
-		j = -1;
-		while (j++ < k)
-			new_environ[j] = environ[j];
-		new_environ[i] = new_var;
-		new_environ[i + 1] = NULL;
-		environ = new_environ;
-		free(new_var);
-		free_list(cmd);
 		i++;
 	}
 	return (0);

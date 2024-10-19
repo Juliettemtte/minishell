@@ -6,49 +6,27 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:12 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/09 13:30:17 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/16 13:58:06 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static int	is_valid_identifier(const char *arg)
-{
-	int	i;
-
-	i = 1;
-	if (!arg || (!ft_isalpha(arg[0]) && arg[0] != '_'))
-	{
-		ft_putstr_fd("export: not a valid identifier\n", 2);
-		return (1);
-	}
-	while (arg[i] != '\0' && arg[i] != '=')
-	{
-		if (!ft_isalnum(arg[i]) && arg[i] != '_')
-		{
-			ft_putstr_fd("export: not a valid identifier\n", 2);
-			return (1);
-		}
-		i++;
-	}
-	return (0);
-}
-
-int	unset(char *name, size_t name_len)
+int	unset(char *name, size_t name_len, t_var *var)
 {
 	int	i;
 	int	j;
 
 	i = 0;
-	while (environ[i] != NULL)
+	while (var->envp[i] != NULL)
 	{
-		if (ft_strncmp(environ[i], name, name_len) == 0
-			&& environ[i][name_len] == '=')
+		if (ft_strncmp(var->envp[i], name, name_len) == 0
+			&& var->envp[i][name_len] == '=')
 		{
 			j = i;
-			while (environ[j] != NULL)
+			while (var->envp[j] != NULL)
 			{
-				environ[j] = environ[j + 1];
+				var->envp[j] = var->envp[j + 1];
 				j++;
 			}
 		}
@@ -57,7 +35,7 @@ int	unset(char *name, size_t name_len)
 	return (i);
 }
 
-int	handle_unset(t_token **token)
+int	handle_unset(t_token **token, t_var *var)
 {
 	int		i;
 
@@ -71,7 +49,7 @@ int	handle_unset(t_token **token)
 	{
 		if (is_valid_identifier(token[i + 1]->value))
 			return (1);
-		unset(token[i + 1]->value, ft_strlen(token[i + 1]->value));
+		unset(token[i + 1]->value, ft_strlen(token[i + 1]->value), var);
 		i++;
 	}
 	return (0);

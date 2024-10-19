@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 14:57:00 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/09 13:50:45 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/19 15:59:10 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,23 @@ static char	**find_path(void)
 	return (full_path);
 }
 
+char	*build_cmd_path(char *dir, char *cmd)
+{
+	char	*tmp;
+	char	*cmd_path;
+
+	tmp = ft_strjoin(dir, "/");
+	if (!tmp)
+		return (NULL);
+	cmd_path = ft_strjoin(tmp, cmd);
+	free(tmp);
+	return (cmd_path);
+}
+
 char	*find_cmd_path(char *cmd)
 {
 	char	**full_path;
 	char	*cmd_path;
-	char	*tmp;
 	int		i;
 
 	full_path = find_path();
@@ -44,19 +56,19 @@ char	*find_cmd_path(char *cmd)
 	i = 0;
 	while (full_path[i] != NULL)
 	{
-		tmp = ft_strjoin(full_path[i], "/");
-		if (!tmp)
-			return (NULL);
-		cmd_path = ft_strjoin(tmp, cmd);
-		free (tmp);
+		cmd_path = build_cmd_path(full_path[i], cmd);
 		if (!cmd_path)
+		{
+			free_list(full_path);
 			return (NULL);
+		}
 		if (access(cmd_path, X_OK) == 0)
 		{
 			free_list(full_path);
 			return (cmd_path);
 		}
 		i++;
+		free(cmd_path);
 	}
 	free_list(full_path);
 	return (NULL);

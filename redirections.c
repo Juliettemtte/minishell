@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 09:43:11 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/11 18:49:37 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/18 18:07:30 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,48 +31,48 @@ static int	init(int *std_in, int *std_out, t_token **tokens, t_var *var)
 	{
 		if (tokens[i]->type > 4)
 			count++;
+		if (tokens[i]->type == 5 || tokens[i]->type == 8)
+			var->input_redir++;
+		if (tokens[i]->type == 6 || tokens[i]->type == 7)
+			var->output_redir++;
 		i++;
 	}
 	return (count);
 }
 
-static void	restore_io(int std_in, int std_out)
+static int	restore_io(int std_in, int std_out, int return_code)
 {
 	dup2(std_in, STDIN_FILENO);
 	dup2(std_out, STDOUT_FILENO);
 	close(std_in);
 	close(std_out);
+	return (return_code);
 }
 
-static int	redirect_input(char *tokens, int mode, char *error, int fd_target)
+static int	redirect_input(char *arg, int mode, char *error, int fd_target, t_var *var)
 {
-	char	*file;
 	int		fd;
 
-	file = ft_strtrim(tokens, "\"\'");
-	if (!file)
-	{
-		perror(error);
-		return (-1);
-	}
-	fd = open(file, mode, 0644);
-	free(file);
+	fd = open(arg, mode, 0644);
 	if (fd < 0)
 	{
 		perror(error);
 		return (-1);
 	}
-	if (dup2(fd, fd_target) < 0)
+	if (var->output_redir == 1 || var->input_redir == 1)
 	{
-		perror("dup2 failed");
-		close(fd);
-		return (-1);
+		if (dup2(fd, fd_target) < 0)
+		{
+			perror("dup2 failed");
+			close(fd);
+			return (-1);
+		}
 	}
 	close(fd);
 	return (1);
 }
 
-static int	process_redirection(t_token *token, t_token *next_token)
+static int	process_redirection(t_token *token, t_token *next_token, t_var *var)
 {
 	int		check;
 	char	*error_message;
@@ -82,20 +82,22 @@ static int	process_redirection(t_token *token, t_token *next_token)
 	{	
 		error_message = "Can't open file for reading";
 		check = redirect_input(next_token->value,
-				O_RDONLY, error_message, STDIN_FILENO);
+				O_RDONLY, error_message, STDIN_FILENO, var);
 	}
 	else if (token->type == REDIRECTION_RIGHT)
 	{	
 		error_message = "Can't open file for writing";
 		check = redirect_input(next_token->value,
-				O_WRONLY | O_CREAT | O_TRUNC, error_message, STDOUT_FILENO);
+				O_WRONLY | O_CREAT | O_TRUNC, error_message, STDOUT_FILENO, var);
 	}
 	else if (token->type == APPEND)
 	{	
 		error_message = "Can't open file for appending";
 		check = redirect_input(next_token->value,
-				O_WRONLY | O_CREAT | O_TRUNC, error_message, STDOUT_FILENO);
+				O_WRONLY | O_CREAT | O_APPEND, error_message, STDOUT_FILENO, var);
 	}
+	else if (token->type == HEREDOC)
+		check = redirect_heredoc(var, token);
 	return (check);
 }
 
@@ -105,118 +107,26 @@ int	handle_redirect(t_var *var, t_token **tokens)
 	int	std_in;
 	int	std_out;
 	int	check;
-	int	redirect_count;
 
-	redirect_count = init(&std_in, &std_out, tokens, var);
-	if (redirect_count == -1)
+	if (init(&std_in, &std_out, tokens, var) == -1)
 		return (-1);
-	if (redirect_count == 0)
-	{
-		restore_io(std_in, std_out);
-		return (0);
-	}
-	i = -1;
-	while (tokens[i++] && var->exit_code != 1)
-	{
-		check = process_redirection(tokens[i], tokens[i + 1]);
-		if (check == -1)
-			break ;
-		if (check == 1)
-			var->exit_code = run_command(var, tokens);
-	}
-	restore_io(std_in, std_out);
-	return (1);
-}
-
-/*
-static int redirect_input(char *tokens, int mode, char *error, int fd_target)
-{
-	char	*file;
-	int		fd;
-
-	file = ft_strtrim(tokens, "\"\'");
-	if (!file)
-	{
-		perror(error);
-		return (-1);
-	}
-	fd = open(file, mode, 0644);
-	free(file);
-	if (fd < 0)
-	{
-		perror(error);
-		return (-1);
-	}
-	if (dup2(fd, fd_target) < 0)
-	{
-		perror("dup2 failed");
-		close(fd);
-		return (-1);
-	}
-	close(fd);
-	return (1);
-}
-
-int	handle_redirect(t_var *var, t_token **tokens)
-{
-	int	i;
-	int	std_in;
-	int	std_out;
-	int	check;
-
-	std_in = dup(STDIN_FILENO);
-	std_out = dup(STDOUT_FILENO);
-	check = 0;
-
-	int	k = 0;
+	if (var->input_redir == 0 && var->output_redir == 0)
+		return (restore_io(std_in, std_out, 3));
 	i = 0;
 	while (tokens[i])
 	{
-		if (tokens[i]->type > 4) // check redirects
-			k++;
+		if (tokens[i]->type > 4 && tokens[i]->type < 9)
+		{
+			check = process_redirection(tokens[i], tokens[i + 1], var);
+			if (check == -1)
+				return (restore_io(std_in, std_out, 1));
+			if (tokens[i]->type == 5 || tokens[i]->type == 8)
+				var->input_redir--;
+			if (tokens[i]->type == 6 || tokens[i]->type == 7)
+				var->output_redir--;
+		}
 		i++;
 	}
-
-	if (k > 0)
-	{
-		i = 0;
-		while (tokens[i] && var->exit_code != 1)
-		{
-			if (tokens[i]->type == REDIRECTION_LEFT)
-			{
-				check = redirect_input(tokens[i + 1]->value,
-				 O_RDONLY, "Can't open file for reading", STDIN_FILENO);
-				if (check == -1)
-					break ;
-			}
-			else if (tokens[i]->type == REDIRECTION_RIGHT)
-			{
-				check = redirect_input(tokens[i + 1]->value, 
-				O_WRONLY | O_CREAT | O_TRUNC, 
-				"Can't open file for writing", STDOUT_FILENO);
-				if (check == -1)
-					break ;
-			}
-			else if (tokens[i]->type == APPEND)
-			{
-				check = redirect_input(tokens[i + 1]->value, 
-				O_WRONLY | O_CREAT | O_APPEND, 
-				"Can't open file for appending", STDOUT_FILENO);
-				if (check == -1)
-					break ;
-			}
-			i++;
-			if (check == 1)
-				var->exit_code = run_command(var, tokens);
-			check = 0;
-		}
-		dup2(std_in, STDIN_FILENO);
-		dup2(std_out, STDOUT_FILENO);
-		close (std_in);
-		close (std_out);
-		return (1);
-	}
-	close (std_in);
-	close (std_out);
-	return (0);
-}*/
+	var->exit_code = run_command(var, tokens);
+	return (restore_io(std_in, std_out, 0));
+}

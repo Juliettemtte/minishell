@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 09:08:47 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/10 11:10:04 by arissane         ###   ########.fr       */
+/*   Updated: 2024/10/16 12:32:03 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,26 +28,25 @@ static int	check_exceptions(t_token **token_group, int i)
 	return (1);
 }
 
-int	handle_env_echo(char *str)
+static int	print_string(t_token **token, int i)
 {
-	char	*value;
+	int	k;
 
-	if (str)
+	k = 0;
+	while (token[i]->value[k])
 	{
-		value = getenv(str);
-		if (!value)
-			return (1);
-		ft_putstr_fd(value, 1);
+		write(1, &token[i]->value[k], 1);
+		k++;
 	}
-	else
-		return (1);
-	return (0);
+	if (token[i + 1])
+		write(1, " ", 1);
+	i++;
+	return (i);
 }
 
 int	handle_echo(t_token **token)
 {
 	int	i;
-	int	k;
 	int	check_n;
 
 	i = 1;
@@ -65,23 +64,7 @@ int	handle_echo(t_token **token)
 			continue ;
 		}
 		if (token[i])
-		{
-			k = 0;
-			while (token[i]->value[k])
-			{
-/*				if (token[i]->value[k] == '$' && token[i]->value[k + 1])
-				{
-					if (handle_env_echo(&token[i]->value[k + 1]) == 1)
-						return (1);
-					break ;
-				}*/
-				write(1, &token[i]->value[k], 1);
-				k++;
-			}
-			if (token[i + 1])
-				write(1, " ", 1);
-			i++;
-		}
+			i = print_string(token, i);
 	}
 	if (check_n == 0)
 		write(1, "\n", 1);

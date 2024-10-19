@@ -1,31 +1,40 @@
 Left to do:
--Learn how everything works
--$?
--exit codes
--<< needs significant improvements
--Launching executables
--Make sure the parsing doesn't let any error cases through || |
+-Calling heredocs in multiple commands causes a Bad address error. Most likely
+ a problem with how var->heredoc_fds are freed(or not freed appropriately)
+-Edge cases
 -Clean up the code
+-Close all fds and free everything inside each process(main,execute,pipes)
 
 
 Kind of working for now:
 -Display prompt
 -Working history
 -Handle quotes
--Handle ctrl-C, -D, and -\
 -Tokenisation
+-executables
+-redirections
+-parsing
 -pipes
 -cd
 -echo -n
 -pwd
 -exit
 -env
-- <  > >> (probably works now?)
+-Handle ctrl-C, -D, and -\
+-<< <  > >> (probably works now?)
 - unset
 - export & export ARG
 
 
 Some thoughts of the day:
+
+cat <test1 test2
+result: test1 is opened as input, but cat will priotitise files and only
+	shows the content of test2.
+
+ls > test1 >test2 (test1 doesn't exist, test2 has no permission to write)
+result: test1 is created and opened, test2 open fails, process ends and
+	ls is not executed.
 
 Exit codes:
 0 success
