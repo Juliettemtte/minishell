@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:45:51 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/18 15:16:13 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/31 10:57:43 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ int	handle_env(t_var *var)
 	int	i;
 
 	i = 0;
-	unset("COLUMNS", ft_strlen("COLUMNS"), var);
-	unset("LINES", ft_strlen("LINES"), var);
+	ft_unset("COLUMNS", ft_strlen("COLUMNS"), var);
+	ft_unset("LINES", ft_strlen("LINES"), var);
 	while (var->envp[i] != NULL)
 	{
 		printf("%s\n", var->envp[i]);

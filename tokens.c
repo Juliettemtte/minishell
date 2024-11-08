@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 17:13:54 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/19 16:01:38 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/07 13:12:53 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ static void	create_token(char *cmd_part, t_token *tokens, t_var *var)
 {
 	char	*path;
 
-	path = find_cmd_path(cmd_part);
+	path = find_cmd_path(cmd_part, 0, var);
 	if (!cmd_part)
 		return ;
 	else if (is_builtins(cmd_part) == 9)
@@ -73,6 +73,7 @@ void	tokenize_cmd_list(t_var *var, t_token *tokens)
 	int	i;
 
 	i = 0;
+	var->heredoc_count = 0;
 	if (!tokens || !var || !var->cmd_list)
 		return ;
 	while (var->cmd_list[i])

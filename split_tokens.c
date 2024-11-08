@@ -6,34 +6,13 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 09:35:42 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/18 10:22:27 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/08 13:31:31 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*void	print_token_groups(t_token ***token_groups)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (token_groups[i])
-	{
-		printf("\nToken group %d:\n", i);
-		j = 0;
-		while (token_groups[i][j])
-		{
-			printf("token %d value = %s type = %d\n", 
-			j, token_groups[i][j]->value, token_groups[i][j]->type);
-			j++;
-		}
-		i++;
-	}
-	printf("\n");
-}*/
-
-t_token	*copy_token(t_token *token)
+static t_token	*copy_token(t_token *token)
 {
 	t_token	*copy;
 
@@ -52,7 +31,7 @@ t_token	*copy_token(t_token *token)
 	return (copy);
 }
 
-t_token	**process_token_group(t_token *tokens, int *k, int *i)
+static t_token	**process_token_group(t_token *tokens, int *k, int *i)
 {
 	int		j;
 	t_token	**token_group;
@@ -76,55 +55,51 @@ t_token	**process_token_group(t_token *tokens, int *k, int *i)
 	return (token_group);
 }
 
-int	group_by_pipes(t_token *tokens, int *i, t_token ***token_groups, int *j)
+static int	group_by_pipes(t_token *tokens, t_token ***token_groups,
+		int i, int *index)
 {
 	int	k;
 
 	k = 0;
-	while (tokens[*i].value)
+	while (tokens[i].value)
 	{
-		if (tokens[*i].type == PIPE)
+		if (tokens[i].type == PIPE)
 		{
-			token_groups[*j] = process_token_group(tokens, &k, i);
-			if (!token_groups[*j])
+			token_groups[*index] = process_token_group(tokens, &k, &i);
+			if (!token_groups[*index])
 				return (-1);
-			(*j)++;
-			k = *i + 1;
+			(*index)++;
+			k = i + 1;
 		}
-		(*i)++;
+		i++;
 	}
-	if (*i > k)
+	if (i > k)
 	{
-		token_groups[*j] = process_token_group(tokens, &k, i);
-		if (!token_groups[*j])
-		{
-			free_token_groups(token_groups);
+		token_groups[*index] = process_token_group(tokens, &k, &i);
+		if (!token_groups[*index])
 			return (-1);
-		}
-		(*j)++;
+		(*index)++;
 	}
 	return (k);
 }
 
 t_token	***split_tokens(t_var *var, t_token *tokens)
 {
-	int		i;
 	int		k;
-	int		group_index;
+	int		index;
 	t_token	***token_groups;
 
-	i = 0;
 	k = 0;
-	group_index = 0;
+	index = 0;
 	token_groups = malloc(sizeof(t_token **) * (var->pipes + 2));
 	if (!token_groups)
 		return (NULL);
-	k = group_by_pipes(tokens, &i, token_groups, &group_index);
+	k = group_by_pipes(tokens, token_groups, 0, &index);
 	if (k == -1)
 	{
 		free_token_groups(token_groups);
 		return (NULL);
 	}
-	token_groups[group_index] = NULL;
+	token_groups[index] = NULL;
 	return (token_groups);
 }

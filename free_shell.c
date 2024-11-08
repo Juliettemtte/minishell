@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 15:05:28 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/19 16:22:30 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/07 13:56:48 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,11 @@ void	free_list(char **list)
 	while (list[i])
 	{
 		free(list[i]);
+		list[i] = NULL;
 		i++;
 	}
 	free(list);
+	list = NULL;
 }
 
 void	free_command(char ***commands)
@@ -37,9 +39,11 @@ void	free_command(char ***commands)
 		while (commands[i])
 		{
 			free_list(commands[i]);
+			commands[i] = NULL;
 			i++;
 		}
 		free(commands);
+		commands = NULL;
 	}
 }
 
@@ -86,13 +90,14 @@ void	free_env(char ***env)
 	}
 }
 
-void	free_shell(t_var *var, t_token *tokens, t_token ***token_groups)
+void	free_shell(t_var *var)
 {
 	if (var->input)
 		free(var->input);
-	free_token_groups(token_groups);
-	free_tokens(tokens);
-	free_env(&var->og_envp);
+	if (var->token_groups)
+		free_token_groups(var->token_groups);
+	if (var->tokens)
+		free_tokens(var->tokens);
 	if (var->cmd_list)
 		free_list(var->cmd_list);
 }

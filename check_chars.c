@@ -6,71 +6,54 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 18:44:40 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/16 16:35:03 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/22 11:19:56 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static char	*create_new_string(char *str, int i, char *value, int end)
+static int	check_depth(char c, int *depth, char *outer_quote)
 {
-	size_t	len;
-	char	*temp;
-	int		k;
-	int		j;
-
-	len = ft_strlen(str) - (end - i) + ft_strlen(value);
-	temp = malloc(sizeof(char) * (len + 1));
-	if (!temp)
-		return (NULL);
-	k = 0;
-	while (k < i)
+	if (*depth == 0)
 	{
-		temp[k] = str[k];
-		k++;
+		*outer_quote = c;
+		(*depth)++;
+		return (0);
 	}
-	j = 0;
-	while (value[j])
-		temp[k++] = value[j++];
-	while (str[end])
-		temp[k++] = str[end++];
-	temp[k] = '\0';
-	free(str);
-	return (temp);
+	else if (c == *outer_quote && *depth == 1)
+	{
+		(*depth)--;
+		return (0);
+	}
+	return (1);
 }
 
-char	*get_env_value(t_var *var, char *str, int i)
+static char	*remove_double_quotes(char *str, int i, int j)
 {
-	char	*value;
-	char	*temp;
-	int		end;
+	int		depth;
+	char	outer_quote;
 
-	end = i + 1;
-	if (str[i + 1] == '?')
+	depth = 0;
+	while (str[i])
 	{
-		value = ft_itoa(var->exit_code);
-		end = i + 2;
+		if (str[i] == '\"' || str[i] == '\'')
+		{
+			if (check_depth(str[i], &depth, &outer_quote) == 0)
+			{
+				i++;
+				continue ;
+			}
+		}
+		str[j++] = str[i++];
 	}
-	else
-	{
-		end = i + 1;
-		while (str[end] && str[end] != ' '
-			&& str[end] != '\"' && str[end] != '\'')
-			end++;
-		temp = ft_substr(str, i + 1, end - (i + 1));
-		value = getenv(temp);
-		free(temp);
-	}
-	return (create_new_string(str, i, value, end));
+	while (str[j])
+		str[j++] = '\0';
+	return (str);
 }
 
-static char	*remove_quotes(t_var *var, char *str)
+static char	*remove_single_quotes(t_var *var, char *str)
 {
 	int		i;
-	int		j;
-	char	c;
-	int		depth;
-	int		outer_quote;
 
 	i = 0;
 	while (str[i])
@@ -88,36 +71,7 @@ static char	*remove_quotes(t_var *var, char *str)
 		}
 		i++;
 	}
-	i = 0;
-	j = 0;
-	depth = 0;
-	while (str[i])
-	{
-		if (str[i] == '\"' || str[i] == '\'')
-		{
-			c = str[i];
-			if (depth == 0)
-			{
-				outer_quote = c;
-				depth++;
-				i++;
-				continue ;
-			}
-			else if (str[i] == outer_quote && depth == 1)
-			{
-				depth--;
-				i++;
-				continue ;
-			}
-		}
-		str[j++] = str[i++];
-	}
-	while (str[j])
-	{
-		str[j] = '\0';
-		j++;
-	}
-	return (str);
+	return (remove_double_quotes(str, 0, 0));
 }
 
 void	check_characters(t_var *var, t_token **token_group)
@@ -127,7 +81,8 @@ void	check_characters(t_var *var, t_token **token_group)
 	i = 0;
 	while (token_group[i])
 	{
-		token_group[i]->value = remove_quotes(var, token_group[i]->value);
+		token_group[i]->value = remove_single_quotes(var,
+				token_group[i]->value);
 		i++;
 	}
 }

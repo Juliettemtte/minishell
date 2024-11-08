@@ -6,13 +6,13 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:12 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/16 13:58:06 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/10/31 10:51:49 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	unset(char *name, size_t name_len, t_var *var)
+int	ft_unset(char *name, size_t name_len, t_var *var)
 {
 	int	i;
 	int	j;
@@ -49,7 +49,7 @@ int	handle_unset(t_token **token, t_var *var)
 	{
 		if (is_valid_identifier(token[i + 1]->value))
 			return (1);
-		unset(token[i + 1]->value, ft_strlen(token[i + 1]->value), var);
+		ft_unset(token[i + 1]->value, ft_strlen(token[i + 1]->value), var);
 		i++;
 	}
 	return (0);

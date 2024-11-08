@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 09:10:36 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/19 16:09:01 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/08 10:16:27 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,23 +27,6 @@ static char	*parse_line(t_var *var, char *line)
 	return (line);
 }
 
-void	close_heredoc_fds(t_var *var)
-{
-	int	i;
-
-	i = 0;
-	if (var->heredoc_fds)
-	{
-		while (var->heredoc_fds[i] != -1)
-		{
-			close(var->heredoc_fds[i]);
-			var->heredoc_fds[i] = -1;
-			i++;
-		}
-		free(var->heredoc_fds);
-	}
-}
-
 //dup2 the read end of the pipe that was saved to var->heredoc_fds to STDIN
 int	redirect_heredoc(t_var *var, t_token *token)
 {
@@ -52,10 +35,10 @@ int	redirect_heredoc(t_var *var, t_token *token)
 		if (dup2(var->heredoc_fds[token->heredoc_index], STDIN_FILENO) < 0)
 		{
 			perror("dup2 failed");
-			return (-1);
+			return (1);
 		}
 	}
-	return (1);
+	return (0);
 }
 
 //start a loop of readline until delimiter is encountered and write to
@@ -66,19 +49,12 @@ static int	create_heredoc(t_var *var, char *delimiter, int heredoc_index)
 	char	*line;
 
 	if (pipe(pipe_fd) == -1)
-	{
-		perror("pipe error");
 		return (1);
-	}
-	line = NULL;
-	g_status = HEREDOC;
 	var->heredoc_fds[heredoc_index] = pipe_fd[0];
 	while (1)
 	{
 		line = readline("> ");
-		if (!line)
-			break ;
-		if (ft_strcmp(line, delimiter) == 0)
+		if (!line || ft_strcmp(line, delimiter) == 0)
 			break ;
 		line = parse_line(var, line);
 		ft_putstr_fd(line, pipe_fd[1]);
@@ -89,6 +65,8 @@ static int	create_heredoc(t_var *var, char *delimiter, int heredoc_index)
 	if (line)
 		free(line);
 	close(pipe_fd[1]);
+	if (g_signal == SIGINT)
+		return (1);
 	return (0);
 }
 
@@ -96,20 +74,48 @@ static int	create_heredoc(t_var *var, char *delimiter, int heredoc_index)
 int	handle_heredoc(t_var *var, t_token *tokens)
 {
 	int	i;
+	int	saved_stdin;
 
-	i = 0;
+	i = -1;
+	saved_stdin = dup(STDIN_FILENO);
 	if (tokens)
 	{
-		while (tokens[i].value)
+		while (tokens[i++].value)
 		{
 			if (tokens[i].type == HEREDOC)
 			{
+				signal(SIGINT, handle_sigint_heredoc);
 				if (create_heredoc(var, tokens[i + 1].value,
 						tokens[i].heredoc_index) == 1)
+				{
+					dup2(saved_stdin, STDIN_FILENO);
+					close(saved_stdin);
 					return (1);
+				}
+				signal(SIGINT, handle_sigint);
 			}
+		}
+	}
+	close(saved_stdin);
+	return (0);
+}
+
+int	init_heredoc_fds(t_var *var)
+{
+	int	i;
+
+	i = 0;
+	if (var->heredoc_count > 0)
+	{
+		var->heredoc_fds = malloc(sizeof(int) * (var->heredoc_count + 1));
+		if (!var->heredoc_fds)
+			return (1);
+		while (i < var->heredoc_count)
+		{
+			var->heredoc_fds[i] = -1;
 			i++;
 		}
+		var->heredoc_fds[i] = -1;
 	}
 	return (0);
 }

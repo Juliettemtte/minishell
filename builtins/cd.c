@@ -6,13 +6,13 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 15:25:42 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/16 14:06:46 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/08 13:26:40 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	export_cd(char *name, char *value, t_var *var)
+static void	export_cd(char *name, char *value, t_var *var)
 {
 	int		i;
 	int		j;
@@ -23,7 +23,7 @@ void	export_cd(char *name, char *value, t_var *var)
 	tmp = ft_strjoin(name, "=");
 	new_var = ft_strjoin(tmp, value);
 	free(tmp);
-	i = unset(name, ft_strlen(name), var);
+	i = ft_unset(name, ft_strlen(name), var);
 	new_environ = malloc((i + 2) * sizeof(char *));
 	if (new_environ == NULL)
 	{
@@ -35,6 +35,7 @@ void	export_cd(char *name, char *value, t_var *var)
 		new_environ[j] = var->envp[j];
 	new_environ[i] = new_var;
 	new_environ[i + 1] = NULL;
+	free(var->envp);
 	var->envp = new_environ;
 }
 
@@ -52,11 +53,6 @@ static int	check_cd(t_token **token, int i, char **new_path)
 		ft_putstr_fd("cd: No such file or directory\n", 2);
 		return (1);
 	}
-	else if (token[i + 1] && token[i + 1]->type == 2)
-	{
-		ft_putstr_fd("cd: too many arguments\n", 2);
-		return (1);
-	}
 	else if (token[i]->value[0] == '$')
 	{
 		*new_path = getenv(token[i]->value + 1);
@@ -65,6 +61,45 @@ static int	check_cd(t_token **token, int i, char **new_path)
 		return (2);
 	}
 	return (0);
+}
+
+static int	build_expand(t_token **token, int i, char **new_path)
+{
+	char	*home;
+	char	expanded_path[260];
+
+	home = getenv("HOME");
+	if (home)
+	{
+		ft_strlcpy(expanded_path, home, sizeof(expanded_path));
+		ft_strlcat(expanded_path, token[i]->value + 1, sizeof(expanded_path));
+		*new_path = ft_strdup(expanded_path);
+	}
+	if (access(*new_path, F_OK) != 0)
+	{
+		ft_putstr_fd("cd: No such file or directory\n", 2);
+		return (1);
+	}
+	return (2);
+}
+
+static int	expand_home_path(t_token **token, int i, char **new_path)
+{
+	if (token[i])
+	{
+		if (token[i + 1] && token[i + 1]->type == 2)
+		{
+			ft_putstr_fd("cd: too many arguments\n", 2);
+			return (1);
+		}
+		if (ft_strncmp(token[i]->value, "~/", 2) == 0)
+			return (build_expand(token, i, new_path));
+		else
+			return (check_cd(token, i, new_path));
+	}
+	else
+		return (check_cd(token, i, new_path));
+	return (2);
 }
 
 int	handle_cd(t_token **token_group, t_var *var)
@@ -78,7 +113,7 @@ int	handle_cd(t_token **token_group, t_var *var)
 	if (!getcwd(old_path, sizeof(old_path)))
 		return (1);
 	i = find_command_index(token_group, "cd");
-	result = check_cd(token_group, i + 1, &new_path);
+	result = expand_home_path(token_group, i + 1, &new_path);
 	if (result == 0)
 		new_path = token_group[i + 1]->value;
 	else if (result == 1)

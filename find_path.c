@@ -6,19 +6,19 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/25 14:57:00 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/19 15:59:10 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/08 13:28:23 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static char	**find_path(void)
+static char	**find_path(t_var *var)
 {
 	char	*path_env;
 	char	*path_cpy;
 	char	**full_path;
 
-	path_env = getenv("PATH");
+	path_env = ft_getenv("PATH", var->envp);
 	if (!path_env)
 		return (NULL);
 	path_cpy = ft_strdup(path_env);
@@ -31,7 +31,7 @@ static char	**find_path(void)
 	return (full_path);
 }
 
-char	*build_cmd_path(char *dir, char *cmd)
+static char	*build_cmd_path(char *dir, char *cmd)
 {
 	char	*tmp;
 	char	*cmd_path;
@@ -44,16 +44,14 @@ char	*build_cmd_path(char *dir, char *cmd)
 	return (cmd_path);
 }
 
-char	*find_cmd_path(char *cmd)
+char	*find_cmd_path(char *cmd, int i, t_var *var)
 {
 	char	**full_path;
 	char	*cmd_path;
-	int		i;
 
-	full_path = find_path();
+	full_path = find_path(var);
 	if (full_path == NULL)
 		return (NULL);
-	i = 0;
 	while (full_path[i] != NULL)
 	{
 		cmd_path = build_cmd_path(full_path[i], cmd);
