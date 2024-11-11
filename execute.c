@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 10:05:12 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/08 13:28:13 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/11 12:22:20 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ static int	fork_exec(t_token **token, t_var *var, char *path, int pid)
 	}
 	else
 	{
-		signal(SIGQUIT, handle_sigquit);
+		signal(SIGQUIT, handle_sigquit_exec);
 		signal(SIGINT, handle_sigint_exec);
 		if (waitpid(pid, &status, 0) == -1)
 		{

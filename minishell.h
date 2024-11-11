@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/08 13:19:23 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/11 17:15:37 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ typedef struct s_var
 	int			nb_cmd;
 	int			heredoc_count;
 	int			*heredoc_fds;
+	int			fd_in;
 }	t_var;
 
 /*************** main ****************/
@@ -74,7 +75,7 @@ typedef struct s_var
 void	init_signal(void);
 void	handle_sigint(int sig);
 void	handle_sigint_exec(int sig);
-void	handle_sigquit(int sig);
+void	handle_sigquit_exec(int sig);
 void	handle_sigint_heredoc(int sig);
 
 /*************** parse ***************/
@@ -115,7 +116,7 @@ int		ft_envcmp(char *envp, char *str);
 
 /********* check_characters **********/
 void	check_characters(t_var *var, t_token **token_group);
-char	*get_env_value(t_var *var, char *str, int i);
+char	*remove_quotes(t_var *var, char *str);
 
 /************* commands ***************/
 int		run_command(t_var *var, t_token **token_group);
@@ -149,7 +150,7 @@ int		redirect_append(char *target, t_var *var);
 /************* builtins ***************/
 int		handle_cd(t_token **token_group, t_var *var);
 void	copy_env(t_var *var, char **envp);
-int		handle_env(t_var *var);
+int		handle_env(t_var *var, t_token **token);
 int		handle_export(t_token **token_group, t_var *var);
 int		ft_unset(char *name, size_t name_len, t_var *var);
 int		handle_unset(t_token **token, t_var *var);

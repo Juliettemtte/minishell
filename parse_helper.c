@@ -6,7 +6,7 @@
 /*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 14:38:02 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/08 10:43:25 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/11 13:30:43 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,10 +106,16 @@ static int	process_special_characters(t_var *var)
 			else
 				var->str[k++] = var->input[i++];
 		}
-		else if (var->input[i] == '\"' && var->input[i + 1] == '\"')
-			i += 2;
+		/*else if (var->input[i] == '\"' && var->input[i + 1] == '\"')
+			i += 2; Don't remove double quotes so that '"$USER"'etc parses correctly
 		else if (var->input[i] == '\'' && var->input[i + 1] == '\'')
-			i += 2;
+			i += 2;*/
+		else if (var->input[i] == '\t')//replace tab with space for later parsing
+		{
+			var->str[k] = ' ';
+			k++;
+			i++;
+		}
 		else if (process_special_characters2(var, &i, &k) == 1)
 			return (1);
 	}

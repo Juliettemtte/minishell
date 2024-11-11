@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 09:10:36 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/08 10:16:27 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/11 13:43:34 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,29 +74,32 @@ static int	create_heredoc(t_var *var, char *delimiter, int heredoc_index)
 int	handle_heredoc(t_var *var, t_token *tokens)
 {
 	int	i;
-	int	saved_stdin;
+	char	*delimiter;
+//	int	saved_stdin;
 
-	i = -1;
-	saved_stdin = dup(STDIN_FILENO);
+	i = 0;
+//	saved_stdin = dup(STDIN_FILENO);
 	if (tokens)
 	{
-		while (tokens[i++].value)
+		while (tokens[i].value)
 		{
 			if (tokens[i].type == HEREDOC)
 			{
-				signal(SIGINT, handle_sigint_heredoc);
-				if (create_heredoc(var, tokens[i + 1].value,
+				//signal(SIGINT, handle_sigint_heredoc);
+				delimiter = remove_quotes(var, tokens[i + 1].value);
+				if (create_heredoc(var, delimiter,
 						tokens[i].heredoc_index) == 1)
 				{
-					dup2(saved_stdin, STDIN_FILENO);
-					close(saved_stdin);
+					//dup2(saved_stdin, STDIN_FILENO);
+					//close(saved_stdin);
 					return (1);
 				}
-				signal(SIGINT, handle_sigint);
+				//signal(SIGINT, handle_sigint);
 			}
+			i++;
 		}
 	}
-	close(saved_stdin);
+	//close(saved_stdin);
 	return (0);
 }
 

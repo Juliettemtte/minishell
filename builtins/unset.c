@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:12 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/31 10:51:49 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/11 16:32:23 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int	ft_unset(char *name, size_t name_len, t_var *var)
 	while (var->envp[i] != NULL)
 	{
 		if (ft_strncmp(var->envp[i], name, name_len) == 0
-			&& var->envp[i][name_len] == '=')
+			&& (var->envp[i][name_len] == '\0' || var->envp[i][name_len] == '='))
 		{
 			j = i;
 			while (var->envp[j] != NULL)

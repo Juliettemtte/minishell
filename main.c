@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:42:58 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/08 11:02:03 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/11 17:19:14 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ static void	initialise(t_var *variables)
 	variables->output_redir = 0;
 	variables->heredoc_count = 0;
 	variables->heredoc_fds = NULL;
+	variables->fd_in = dup(STDIN_FILENO);
 	init_signal();
 }
 
@@ -54,7 +55,6 @@ static int	handle_commands(t_var *var)
 	}
 	else
 		return (2);
-	close_heredoc_fds(var);
 	return (0);
 }
 
@@ -67,10 +67,12 @@ static int	parse_and_execute(t_var *var)
 	}
 	else if (handle_commands(var) == 2)
 	{
-		close_heredoc_fds(var);
-		rl_on_new_line();
-		rl_replace_line("", 0);
+		dup2(var->fd_in, STDIN_FILENO);
+		//close_heredoc_fds(var);
+		//rl_on_new_line();
+		//rl_replace_line("", 0);
 	}
+	close_heredoc_fds(var);
 	if (g_signal == SIGINT)
 		var->exit_code = 130;
 	if (g_signal == SIGQUIT)
@@ -88,9 +90,15 @@ static int	run_shell(t_var *var)
 		initialise(var);
 		var->input = readline("prompt = ");
 		if (var->input == NULL)
-			var->input = ft_strdup("exit");
+		{
+			if (g_signal == SIGINT)//if stdin was closed by sigint, restore stdin
+				dup2(var->fd_in, STDIN_FILENO);
+			else
+				var->input = ft_strdup("exit");//ctrl-D causes the shell to exit normally due to EOF and the message is indeed written in stdout just like manual exit
+		}
 		add_history(var->input);
 		parse_and_execute(var);
+		close(var->fd_in);//fd_in that is used to store stdin in order to replicate ctrl-C
 		if (var->exit_code == -2)
 		{
 			exit_code = my_exit(var->token_groups[0]);
@@ -108,8 +116,12 @@ int	main(int argc, char **argv, char **envp)
 	int		exit_code;
 	t_var	variables;
 
-	(void)argc;
 	(void)argv;
+	if (argc != 1)
+	{
+		printf("Too many arguments\n");
+		return (1);
+	}
 	exit_code = 1;
 	variables.exit_code = 0;
 	copy_env(&variables, envp);

@@ -6,7 +6,7 @@
 /*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 14:31:07 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/30 11:04:27 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/11 14:20:41 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,10 @@ int	validate_heredoc_input(char *input)
 	int	i;
 
 	i = 0;
+	while (input[i] && input[i] == ' ')
+		i++;
+	if (input[i] == '\0')
+		return (1);
 	while (input[i] && input[i] != ' ')
 	{
 		if (input[i] == '<' || input[i] == '>')

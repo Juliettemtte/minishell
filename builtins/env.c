@@ -6,11 +6,20 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:45:51 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/31 10:57:43 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/11 17:36:33 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
+
+static void	empty_env(t_var *var)
+{
+	var->og_envp = (char **)malloc(sizeof(char *) * 4);
+	var->og_envp[0] = ft_strdup("PWD=/home/jmouette/Studies/Rank03/minishell");
+	var->og_envp[1] = ft_strdup("SHLVL=2");
+	var->og_envp[2] = ft_strdup("_=/usr/bin/env");
+	var->og_envp[3] = NULL;
+}
 
 void	copy_env(t_var *var, char **envp)
 {
@@ -21,25 +30,36 @@ void	copy_env(t_var *var, char **envp)
 	envp_len = 0;
 	while (envp[envp_len])
 		envp_len++;
-	var->og_envp = (char **)malloc(sizeof(char *) * (envp_len + 1));
-	if (!var->og_envp)
-		return ;
-	while (i < envp_len)
+	if (envp_len == 0)
+		empty_env(var);
+	else
 	{
-		var->og_envp[i] = ft_strdup(envp[i]);
-		i++;
+		var->og_envp = (char **)malloc(sizeof(char *) * (envp_len + 1));
+		if (!var->og_envp)
+			return ;
+		while (i < envp_len)
+		{
+			var->og_envp[i] = ft_strdup(envp[i]);
+			i++;
+		}
+		var->og_envp[envp_len] = NULL;
 	}
-	var->og_envp[envp_len] = NULL;
 	var->envp = var->og_envp;
 }
 
-int	handle_env(t_var *var)
+int	handle_env(t_var *var, t_token **token)
 {
 	int	i;
 
-	i = 0;
+	i = find_command_index(token, "env");
 	ft_unset("COLUMNS", ft_strlen("COLUMNS"), var);
 	ft_unset("LINES", ft_strlen("LINES"), var);
+	if (token[i + 1] && token[i + 1]->type == 2)
+	{
+		printf("Too many arguments\n");
+		return (1);
+	}
+	i = 0;
 	while (var->envp[i] != NULL)
 	{
 		printf("%s\n", var->envp[i]);
