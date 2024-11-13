@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/09 09:43:11 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/22 13:30:23 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/13 14:57:13 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static int	init(int *std_in, int *std_out, t_token **tokens, t_var *var)
 	int	i;
 	int	count;
 
-	check_characters(var, tokens);
+	check_characters(tokens);
 	*std_in = dup(STDIN_FILENO);
 	*std_out = dup(STDOUT_FILENO);
 	if (*std_in == -1 || *std_out == -1)

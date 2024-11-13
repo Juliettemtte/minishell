@@ -6,23 +6,24 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 15:25:42 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/08 13:26:40 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 14:25:55 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static void	export_cd(char *name, char *value, t_var *var)
+void	export_cd(char *name, char *value, t_var *var)
 {
 	int		i;
 	int		j;
-	char	*tmp;
 	char	*new_var;
 	char	**new_environ;
 
-	tmp = ft_strjoin(name, "=");
-	new_var = ft_strjoin(tmp, value);
-	free(tmp);
+	if (value)
+		new_var = ft_strjoin(name, value);
+	else
+		new_var = name;
+	name = ft_strtrim(name, "=");
 	i = ft_unset(name, ft_strlen(name), var);
 	new_environ = malloc((i + 2) * sizeof(char *));
 	if (new_environ == NULL)
@@ -122,8 +123,7 @@ int	handle_cd(t_token **token_group, t_var *var)
 	{
 		if (!getcwd(new_cwd, sizeof(new_cwd)))
 			return (1);
-		export_cd("OLDPWD", old_path, var);
-		export_cd("PWD", new_cwd, var);
+		change_env_cd(old_path, new_cwd, var);
 	}
 	else
 		return (1);

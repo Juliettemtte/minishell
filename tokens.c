@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/16 17:13:54 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/07 13:12:53 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 16:00:18 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,29 @@ void	free_tokens(t_token *tokens)
 		i++;
 	}
 	free(tokens);
+}
+
+//check if the next token after a redirection is valid
+//(not a pipe, null, or a redirection)
+static int	validate_redirections_pipes(t_token *tokens)
+{
+	int	i;
+
+	i = 0;
+	while (tokens[i].value)
+	{
+		if (tokens[0].type == PIPE)
+			return (1);
+		if (tokens[i].type == PIPE && tokens[i + 1].type == PIPE)
+			return (1);
+		if (tokens[i].type > 4 && tokens[i + 1].value \
+			&& tokens[i + 1].type > 3)
+			return (1);
+		if (tokens[i].type > 4 && !tokens[i + 1].value)
+			return (1);
+		i++;
+	}
+	return (0);
 }
 
 int	count_cmd_list(char **cmd_list)
@@ -68,14 +91,14 @@ static void	create_token(char *cmd_part, t_token *tokens, t_var *var)
 	tokens->value = ft_strdup(cmd_part);
 }
 
-void	tokenize_cmd_list(t_var *var, t_token *tokens)
+int	tokenize_cmd_list(t_var *var, t_token *tokens)
 {
 	int	i;
 
 	i = 0;
 	var->heredoc_count = 0;
 	if (!tokens || !var || !var->cmd_list)
-		return ;
+		return (1);
 	while (var->cmd_list[i])
 	{
 		create_token(var->cmd_list[i], &tokens[i], var);
@@ -84,4 +107,10 @@ void	tokenize_cmd_list(t_var *var, t_token *tokens)
 		i++;
 	}
 	tokens[i].value = NULL;
+	if (validate_redirections_pipes(tokens) == 1)
+	{
+		write(2, "syntax error\n", 13);
+		return (2);
+	}
+	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 10:59:52 by arissane          #+#    #+#             */
-/*   Updated: 2024/10/30 11:36:26 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/13 14:34:43 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ char	*get_env_value(t_var *var, char *str, int i)
 	char	*temp;
 	int		end;
 
-	end = i + 1;
 	if (str[i + 1] == '?')
 	{
 		value = ft_itoa(var->exit_code);

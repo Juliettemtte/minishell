@@ -6,11 +6,25 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 15:55:28 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/11 17:15:25 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 14:57:44 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+static char	*find_command(t_token **token_group)
+{
+	int		i;
+
+	i = 0;
+	while (token_group[i]->value && token_group[i]->type > 2)
+	{
+		if (token_group[i]->type != 6)
+			i++;
+		i++;
+	}
+	return (token_group[i]->value);
+}
 
 int	run_command(t_var *var, t_token **token_group)
 {
@@ -18,8 +32,8 @@ int	run_command(t_var *var, t_token **token_group)
 
 	if (!token_group)
 		return (0);
-	check_characters(var, token_group);
-	cmd = token_group[0]->value;
+	check_characters(token_group);
+	cmd = find_command(token_group);
 	if (is_builtins(cmd) == 1)
 		return (-2);
 	if (is_builtins(cmd) == 2)

@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:12 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/11 16:32:23 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 15:57:10 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@ int	ft_unset(char *name, size_t name_len, t_var *var)
 	i = 0;
 	while (var->envp[i] != NULL)
 	{
-		if (ft_strncmp(var->envp[i], name, name_len) == 0
-			&& (var->envp[i][name_len] == '\0' || var->envp[i][name_len] == '='))
+		if (ft_strncmp(var->envp[i], name, name_len) == 0 \
+			&& (var->envp[i][name_len] == '\0' \
+			|| var->envp[i][name_len] == '='))
 		{
 			j = i;
 			while (var->envp[j] != NULL)
@@ -47,7 +48,7 @@ int	handle_unset(t_token **token, t_var *var)
 	}
 	while (token[i + 1] && token[i + 1]->type == 2)
 	{
-		if (is_valid_identifier(token[i + 1]->value))
+		if (is_valid_identifier(token[i + 1]->value, "unset"))
 			return (1);
 		ft_unset(token[i + 1]->value, ft_strlen(token[i + 1]->value), var);
 		i++;

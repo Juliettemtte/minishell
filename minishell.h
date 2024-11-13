@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/11 17:15:37 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 15:58:50 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <stdbool.h>
 # include <sys/wait.h>
 # include <errno.h>
+# include <limits.h>
 # include <dirent.h>
 
 extern int	g_signal;
@@ -34,6 +35,7 @@ extern int	g_signal;
 # define REDIRECTION_RIGHT 6
 # define APPEND 7
 # define HEREDOC 8
+# define EMPTY_LINE 9
 
 typedef struct s_token
 {
@@ -57,6 +59,7 @@ typedef struct s_var
 	char		**og_envp;
 	t_token		*tokens;
 	t_token		***token_groups;
+	int			status;
 	int			is_redirect;
 	int			input_redir;
 	int			output_redir;
@@ -113,10 +116,13 @@ int		count_cmd(char **cmd_list);
 
 /************** utils3 ***************/
 int		ft_envcmp(char *envp, char *str);
+long	ft_atol(const char *str);
+int		validate_cmd_path(char *cmd);
 
 /********* check_characters **********/
-void	check_characters(t_var *var, t_token **token_group);
-char	*remove_quotes(t_var *var, char *str);
+void	check_characters(t_token **token_group);
+char	*remove_quotes(char *str);
+int		is_inside_quotes(char c, int *depth, char *outer_quote);
 
 /************* commands ***************/
 int		run_command(t_var *var, t_token **token_group);
@@ -136,7 +142,7 @@ void	free_shell(t_var *var);
 
 /*************** tokens ***************/
 void	free_tokens(t_token *tokens);
-void	tokenize_cmd_list(t_var *var, t_token *tokens);
+int		tokenize_cmd_list(t_var *var, t_token *tokens);
 int		count_cmd_list(char **cmd_list);
 
 /*********** redirections *************/
@@ -164,6 +170,8 @@ int		my_exit(t_token **token);
 
 /********** builtins_utils ************/
 int		find_command_index(t_token **tokens, const char *command);
-int		is_valid_identifier(const char *arg);
+int		is_valid_identifier(const char *arg, char *cmd);
+void	change_env_cd(char *old_pwd, char *new_pwd, t_var *var);
+void	export_cd(char *name, char *value, t_var *var);
 
 #endif

@@ -6,23 +6,24 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 18:44:40 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/11 13:37:15 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/13 14:56:32 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	check_depth(char c, int *depth, char *outer_quote)
+int	is_inside_quotes(char c, int *depth, char *outer_quote)
 {
 	if (*depth == 0)
 	{
 		*outer_quote = c;
-		(*depth)++;
+		*depth = 1;
 		return (0);
 	}
 	else if (c == *outer_quote && *depth == 1)
 	{
-		(*depth)--;
+		*depth = 0;
+		*outer_quote = '\0';
 		return (0);
 	}
 	return (1);
@@ -38,7 +39,7 @@ static char	*remove_double_quotes(char *str, int i, int j)
 	{
 		if (str[i] == '\"' || str[i] == '\'')
 		{
-			if (check_depth(str[i], &depth, &outer_quote) == 0)
+			if (is_inside_quotes(str[i], &depth, &outer_quote) == 0)
 			{
 				i++;
 				continue ;
@@ -51,7 +52,7 @@ static char	*remove_double_quotes(char *str, int i, int j)
 	return (str);
 }
 
-char	*remove_quotes(t_var *var, char *str)
+char	*remove_quotes(char *str)
 {
 	int		i;
 
@@ -64,24 +65,19 @@ char	*remove_quotes(t_var *var, char *str)
 				i++;
 			i += 2;
 		}
-		if (str[i] == '$' && str[i + 1] && str[i + 1] != ' '
-			&& str[i + 1] != '\"')
-		{
-			str = get_env_value(var, str, i);
-		}
 		i++;
 	}
 	return (remove_double_quotes(str, 0, 0));
 }
 
-void	check_characters(t_var *var, t_token **token_group)
+void	check_characters(t_token **token_group)
 {
 	int	i;
 
 	i = 0;
 	while (token_group[i])
 	{
-		token_group[i]->value = remove_quotes(var,
+		token_group[i]->value = remove_quotes(
 				token_group[i]->value);
 		i++;
 	}

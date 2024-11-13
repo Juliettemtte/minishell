@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 10:40:11 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/08 10:53:45 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/13 15:59:26 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,55 +53,55 @@ static int	count_words(char const *str, char c)
 	return (count);
 }
 
-static const char	*find_next_token(const char *s, char c, int *inside_quotes)
+static const char	*find_next_token(const char *str, char c, int *in_quotes)
 {
-	while (*s)
+	while (*str)
 	{
-		if (*s == '\"' || *s == '\'')
-			*inside_quotes = !(*inside_quotes);
-		if (*s == c && !(*inside_quotes))
+		if (*str == '\"' || *str == '\'')
+			*in_quotes = !(*in_quotes);
+		if (*str == c && !(*in_quotes))
 			break ;
-		s++;
+		str++;
 	}
-	return (s);
+	return (str);
 }
 
-static char	*extract_token(const char **s, char c)
+static char	*extract_token(const char **str, char c)
 {
 	const char	*start;
 	char		quote_char;
 	int			inside_quotes;
 
-	start = *s;
+	start = *str;
 	inside_quotes = 0;
-	if (**s == '\"' || **s == '\'')
+	if (**str == '\"' || **str == '\'')
 	{
-		quote_char = **s;
-		(*s)++;
-		while (**s && **s != quote_char)
-			(*s)++;
-		if (**s == quote_char)
-			(*s)++;
+		quote_char = **str;
+		(*str)++;
+		while (**str && **str != quote_char)
+			(*str)++;
+		if (**str == quote_char)
+			(*str)++;
 	}
-	*s = find_next_token(*s, c, &inside_quotes);
-	return (ft_substr(start, 0, *s - start));
+	*str = find_next_token(*str, c, &inside_quotes);
+	return (ft_substr(start, 0, *str - start));
 }
 
-char	**split_input(char const *s, char c)
+char	**split_input(char const *str, char c)
 {
 	char	**result;
 	int		i;
 
-	i = count_words(s, c);
+	i = count_words(str, c);
 	result = (char **)malloc((i + 1) * sizeof(char *));
 	if (!result)
 		return (NULL);
 	i = 0;
-	while (*s)
+	while (*str)
 	{
-		if (*s != c)
+		if (*str != c)
 		{
-			result[i] = extract_token(&s, c);
+			result[i] = extract_token(&str, c);
 			if (!result[i])
 			{
 				free_list(result);
@@ -110,7 +110,7 @@ char	**split_input(char const *s, char c)
 			i++;
 		}
 		else
-			s++;
+			str++;
 	}
 	result[i] = NULL;
 	return (result);

@@ -6,7 +6,7 @@
 /*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 14:38:02 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/11 13:30:43 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/12 12:43:52 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,7 @@ static int	process_special_characters3(t_var *var, int *i, int *k)
 	if (var->input[*i] == '<' && var->input[*i + 1] == '<')
 	{
 		if (validate_heredoc_input(&var->input[*i + 2]) == 1)
-		{
-			printf("heredoc syntax\n");
 			return (1);
-		}
 		copy2_with_space(var->input, var->str, i, k);
 	}
 	else if (var->input[*i] == '>' && var->input[*i + 1] == '>')
@@ -106,11 +103,7 @@ static int	process_special_characters(t_var *var)
 			else
 				var->str[k++] = var->input[i++];
 		}
-		/*else if (var->input[i] == '\"' && var->input[i + 1] == '\"')
-			i += 2; Don't remove double quotes so that '"$USER"'etc parses correctly
-		else if (var->input[i] == '\'' && var->input[i + 1] == '\'')
-			i += 2;*/
-		else if (var->input[i] == '\t')//replace tab with space for later parsing
+		else if (var->input[i] == '\t')
 		{
 			var->str[k] = ' ';
 			k++;

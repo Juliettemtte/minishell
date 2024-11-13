@@ -1,0 +1,5 @@
+full test:
+valgrind --show-leak-kinds=all --leak-check=full --track-fds=yes --suppressions=vg.supp --trace-children=yes ./minishell
+
+supression generator:
+valgrind --leak-check=full --show-leak-kinds=all --gen-suppressions=all --suppressions=vg.supp ./minishell

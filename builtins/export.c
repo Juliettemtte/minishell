@@ -6,13 +6,13 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:49 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/11 17:22:37 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 15:58:31 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-static char *handle_equal_sign(t_token **token, char *str, char ***cmd, int i)
+static char	*handle_equal_sign(t_token **token, char *str, char ***cmd, int i)
 {
 	char	*value;
 	int		len;
@@ -35,12 +35,12 @@ static char *handle_equal_sign(t_token **token, char *str, char ***cmd, int i)
 	return (value);
 }
 
-static char *check_export(t_token **token, int i, char ***cmd)
+static char	*check_export(t_token **token, int i, char ***cmd)
 {
-	char *equal_sign;
-	char *value;
+	char	*equal_sign;
+	char	*value;
 
-	if (is_valid_identifier(token[i]->value))
+	if (is_valid_identifier(token[i]->value, "export"))
 		return (NULL);
 	*cmd = malloc(sizeof(char *));
 	if (!(*cmd))
@@ -57,11 +57,11 @@ static char *check_export(t_token **token, int i, char ***cmd)
 	return (NULL);
 }
 
-static int set_environment_variable(char *name, char *value, t_var *var)
+static int	set_environment_variable(char *name, char *value, t_var *var)
 {
-	int k;
-	int j;
-	char **new_environ;
+	int		k;
+	int		j;
+	char	**new_environ;
 
 	k = ft_unset(name, ft_strlen(name), var);
 	new_environ = malloc((k + 2) * sizeof(char *));
@@ -80,11 +80,11 @@ static int set_environment_variable(char *name, char *value, t_var *var)
 	return (1);
 }
 
-static int export_variable(t_token **token_group, int index, t_var *var)
+static int	export_variable(t_token **token_group, int index, t_var *var)
 {
-	char *new_var;
-	char **cmd;
-	int result;
+	char	*new_var;
+	char	**cmd;
+	int		result;
 
 	new_var = check_export(token_group, index, &cmd);
 	result = 1;
@@ -98,9 +98,9 @@ static int export_variable(t_token **token_group, int index, t_var *var)
 	return (1);
 }
 
-int handle_export(t_token **token_group, t_var *var)
+int	handle_export(t_token **token_group, t_var *var)
 {
-	int i;
+	int	i;
 
 	i = find_command_index(token_group, "export");
 	if (i == 0 && token_group[i + 1] == NULL)

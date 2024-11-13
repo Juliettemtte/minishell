@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 17:14:20 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/08 13:27:17 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 15:56:49 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ static long	get_numeric_exit_value(t_token **token, int i, int j, int is_neg)
 	exit_code = 0;
 	while (token[j]->value[i] != '\0')
 	{
-		while (token[j]->value[i] == '"')
-			i++;
 		if (token[j]->value[i] == '\0')
 			break ;
-		if (!ft_isdigit(token[j]->value[i]))
+		if (!ft_isdigit(token[j]->value[i]) \
+			|| ft_atol(token[j]->value) <= LONG_MIN \
+			|| ft_atol(token[j]->value) >= LONG_MAX)
 		{
 			write(2, "exit: numeric argument required\n", 32);
 			exit(2);
@@ -50,11 +50,11 @@ int	my_exit(t_token **token)
 	j = find_command_index(token, "exit");
 	j++;
 	if (token[j] == NULL || token[j]->value == NULL)
-		return (EXIT_SUCCESS);
+		return (0);
 	if (token[j + 1] != NULL && token[j + 1]->value != NULL)
 	{
 		write(2, "exit: too many arguments\n", 25);
-		return (EXIT_FAILURE);
+		return (-3);
 	}
 	while (token[j]->value[i] == '+' || token[j]->value[i] == '"')
 		i++;

@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:42:58 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/11 17:19:14 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/13 15:56:08 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,13 @@ static int	handle_commands(t_var *var)
 {
 	var->tokens = malloc(sizeof(t_token) * (count_cmd_list(var->cmd_list) + 1));
 	if (!var->tokens)
-	{
-		var->exit_code = 1;
 		return (1);
-	}
 	init_heredoc_fds(var);
-	tokenize_cmd_list(var, var->tokens);
+	if (tokenize_cmd_list(var, var->tokens) == 2)
+	{
+		var->exit_code = 2;
+		return (3);
+	}
 	if (handle_heredoc(var, var->tokens) != 1)
 	{
 		var->token_groups = split_tokens(var, var->tokens);
@@ -60,25 +61,24 @@ static int	handle_commands(t_var *var)
 
 static int	parse_and_execute(t_var *var)
 {
-	if (parse(var) == 2)
+	int	check;
+
+	check = parse(var);
+	if (check == 2)
 	{
 		var->exit_code = 2;
-		printf("parse error\n");
+		write(2, "syntax error\n", 13);
+		return (2);
 	}
-	else if (handle_commands(var) == 2)
-	{
+	if (check == 3)
+		return (0);
+	if (check == 1)
+		return (1);
+	check = handle_commands(var);
+	if (check == 2)
 		dup2(var->fd_in, STDIN_FILENO);
-		//close_heredoc_fds(var);
-		//rl_on_new_line();
-		//rl_replace_line("", 0);
-	}
 	close_heredoc_fds(var);
-	if (g_signal == SIGINT)
-		var->exit_code = 130;
-	if (g_signal == SIGQUIT)
-		var->exit_code = 131;
-	g_signal = 0;
-	return (0);
+	return (check);
 }
 
 static int	run_shell(t_var *var)
@@ -91,20 +91,47 @@ static int	run_shell(t_var *var)
 		var->input = readline("prompt = ");
 		if (var->input == NULL)
 		{
-			if (g_signal == SIGINT)//if stdin was closed by sigint, restore stdin
+			if (g_signal == SIGINT)
+			{
 				dup2(var->fd_in, STDIN_FILENO);
+				if (var->exit_code != 130 || var->status == EMPTY_LINE)
+				{
+					var->status = 0;
+					write(1, "\n", 1);
+				}
+				var->exit_code = 130;
+				g_signal = 0;
+			}
 			else
-				var->input = ft_strdup("exit");//ctrl-D causes the shell to exit normally due to EOF and the message is indeed written in stdout just like manual exit
+				var->exit_code = -2;
 		}
-		add_history(var->input);
-		parse_and_execute(var);
-		close(var->fd_in);//fd_in that is used to store stdin in order to replicate ctrl-C
+		else
+		{
+			add_history(var->input);
+			if (parse_and_execute(var) == 1)
+			{
+				write(2, "malloc error\n", 13);
+				var->exit_code = 1;
+			}
+			if (g_signal == SIGINT)
+				var->exit_code = 130;
+			if (g_signal == SIGQUIT)
+				var->exit_code = 131;
+			g_signal = 0;
+		}
+		close(var->fd_in);
 		if (var->exit_code == -2)
 		{
-			exit_code = my_exit(var->token_groups[0]);
-			free_shell(var);
-			write(1, "exit\n", 5);
-			return (exit_code);
+			exit_code = 1;
+			if (var->token_groups != NULL)
+				exit_code = my_exit(var->token_groups[0]);
+			if (exit_code != -3)
+			{
+				free_shell(var);
+				write(1, "exit\n", 5);
+				return (exit_code);
+			}
+			var->exit_code = 1;
 		}
 		free_shell(var);
 	}
@@ -123,6 +150,7 @@ int	main(int argc, char **argv, char **envp)
 		return (1);
 	}
 	exit_code = 1;
+	variables.status = 0;
 	variables.exit_code = 0;
 	copy_env(&variables, envp);
 	exit_code = run_shell(&variables);
