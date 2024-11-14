@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 17:14:20 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/13 15:56:49 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/14 11:16:34 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ static long	get_numeric_exit_value(t_token **token, int i, int j, int is_neg)
 		if (token[j]->value[i] == '\0')
 			break ;
 		if (!ft_isdigit(token[j]->value[i]) \
-			|| ft_atol(token[j]->value) <= LONG_MIN \
-			|| ft_atol(token[j]->value) >= LONG_MAX)
+			|| ft_atol(token[j]->value, 0) <= LONG_MIN \
+			|| ft_atol(token[j]->value, 0) >= LONG_MAX)
 		{
 			write(2, "exit: numeric argument required\n", 32);
 			exit(2);

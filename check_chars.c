@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 18:44:40 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/13 14:56:32 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/14 14:45:52 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,7 @@ static char	*remove_double_quotes(char *str, int i, int j)
 		}
 		str[j++] = str[i++];
 	}
-	while (str[j])
-		str[j++] = '\0';
+	str[j] = '\0';
 	return (str);
 }
 
@@ -65,14 +64,15 @@ char	*remove_quotes(char *str)
 				i++;
 			i += 2;
 		}
-		i++;
+		else
+			i++;
 	}
 	return (remove_double_quotes(str, 0, 0));
 }
 
 void	check_characters(t_token **token_group)
 {
-	int	i;
+	int		i;
 
 	i = 0;
 	while (token_group[i])

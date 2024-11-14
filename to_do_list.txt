@@ -1,10 +1,9 @@
 LEFT TO DO:
-Exit code wrong if we run a program with sec fault
-<<1 cat >> o => not working 
-Rm a folder (../../dir) we are in and pwd => should not exit
-Env | grep=PWD => should work 
-If we remove PWD, OLDPWD should be empty
-export 1 OK - export with same name NOT OK
+check leaks
+if the current directory is removed, cd and pwd break
+-mkdir test; cd test; -> in another window rm -rf test
+
+((((((((((((Env | grep=PWD => should work ))))))))))))
 
 
 
@@ -20,6 +19,7 @@ Env -i .\minishell => env -i bash => if it’s null create a default env
 Cat << ‘1’ => should be like cat << 1
 Spaces | cat -e => should not work syntax error
 >>>>>>>>> => syntax error
+<<1 cat >> o => not working 
 << => seg fault 
 > => should not work
 ‘>>’ out2 => should not work
@@ -30,7 +30,10 @@ Exit with a big big big number => numeric argument required
 Env word word => should error 
 Unset -I => error should be unset not export 
 /bin/cat < Makefile => leaks
-
+If we remove PWD, OLDPWD should be empty
+Exit code wrong if we run a program with sec fault
+export 1 OK - export with same name NOT OK
+Rm a folder (../../dir) we are in and pwd => should not exit
 
 
 

@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:49 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/13 15:58:31 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/14 13:35:13 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,9 @@ static int	set_environment_variable(char *name, char *value, t_var *var)
 	if (new_environ == NULL)
 		return (0);
 	j = 0;
+	k = 0;
+	while (var->envp[k])
+		k++;
 	while (j <= k)
 	{
 		new_environ[j] = var->envp[j];

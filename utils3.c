@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 11:29:33 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/13 16:00:01 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/14 11:15:11 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,11 @@ int	ft_envcmp(char *envp, char *str)
 	return (0);
 }
 
-long	ft_atol(const char *str)
+long	ft_atol(const char *str, int i)
 {
-	int			i;
 	long		sign;
 	long long	result;
 
-	i = 0;
 	sign = 1;
 	result = 0;
 	while ((str[i] >= 9 && str[i] <= 13) || str[i] == 32)

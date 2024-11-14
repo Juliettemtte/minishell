@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/13 15:58:50 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/14 11:51:15 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,8 @@ typedef struct s_var
 	int			fd_in;
 }	t_var;
 
-/*************** main ****************/
+/******** parse_and_execute **********/
+void	parse_and_execute(t_var *var);
 
 /************** signal ***************/
 void	init_signal(void);
@@ -85,7 +86,7 @@ void	handle_sigint_heredoc(int sig);
 int		parse(t_var *variables);
 
 /************ parse_helper ***********/
-int		split_redirections(t_var *var);
+int		parse_add_spaces(t_var *var, int i, int k);
 
 /************ parse_utils ************/
 int		check_env(t_var *var, int i);
@@ -116,7 +117,7 @@ int		count_cmd(char **cmd_list);
 
 /************** utils3 ***************/
 int		ft_envcmp(char *envp, char *str);
-long	ft_atol(const char *str);
+long	ft_atol(const char *str, int i);
 int		validate_cmd_path(char *cmd);
 
 /********* check_characters **********/
@@ -128,7 +129,11 @@ int		is_inside_quotes(char c, int *depth, char *outer_quote);
 int		run_command(t_var *var, t_token **token_group);
 
 /************* execute ****************/
-int		execute_command(t_token **token_group, t_var *var);
+int		execute_command(t_token **token_group, t_var *var, char *cmd);
+
+/********** execute_utils *************/
+int		handle_exec_errors(char *command);
+char	**fill_args(t_token **token, char **args);
 
 /*********** split_tokens *************/
 t_token	***split_tokens(t_var *var, t_token *tokens);

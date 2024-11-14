@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:12 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/13 15:57:10 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/14 13:45:28 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,14 @@ int	ft_unset(char *name, size_t name_len, t_var *var)
 			&& (var->envp[i][name_len] == '\0' \
 			|| var->envp[i][name_len] == '='))
 		{
+			free(var->envp[i]);
 			j = i;
 			while (var->envp[j] != NULL)
 			{
 				var->envp[j] = var->envp[j + 1];
 				j++;
 			}
+			continue ;
 		}
 		i++;
 	}
