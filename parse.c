@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 09:53:07 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 14:00:57 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 12:29:29 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,8 @@ int	parse(t_var *var)
 		return (2);
 	var->str = expand_global_variables(var, var->str, 0, 0);
 	var->cmd_list = split_input(var->str, ' ');
-	free(var->str);
+	if (var->str)
+		free(var->str);
 	if (!var->cmd_list)
 		return (1);
 	if (!var->cmd_list[0])

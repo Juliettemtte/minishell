@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 14:26:15 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/13 16:00:57 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/15 10:53:57 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ void	handle_sigquit_exec(int sig)
 //will continue the normal loop
 void	handle_sigint_heredoc(int sig)
 {
-	write(1, "\n>\n", 3);
+	write(1, "\n", 1);
 	g_signal = sig;
 	close(STDIN_FILENO);
 }
@@ -35,10 +35,8 @@ void	handle_sigint_exec(int sig)
 	g_signal = sig;
 }
 
-//I use the same logic as sigint_heredoc in order to
-//force the readline function stop waiting for more input
-//if != sig handles the case where ctrl-C is pressed
-//multiple times during the initial prompt
+//Force the readline function stop waiting for more input
+//and handle the different cases in the main
 void	handle_sigint(int sig)
 {
 	g_signal = sig;

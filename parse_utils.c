@@ -3,30 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   parse_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 14:31:07 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 10:40:42 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 12:33:33 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	check_env(t_var *var, int i)
+int	check_env(t_var *var, int i, int k)
 {
 	int		j;
-	int		k;
 	int		len;
 	char	*temp;
 	char	*envp;
 
-	i++;
-	j = i - 1;
-	k = 0;
+	j = i;
 	len = 0;
-	while (var->input[j++] && var->input[j] != ' '
+	while (var->input[j] && var->input[j] != ' '
 		&& var->input[j] != '\"' && var->input[j] != '\'')
+	{
+		j++;
 		len++;
+	}
 	temp = malloc(sizeof(char) * (len + 1));
 	if (!temp)
 		return (1);

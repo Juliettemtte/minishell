@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/14 18:44:40 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/14 14:45:52 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 11:48:41 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,11 @@ char	*remove_quotes(char *str)
 	{
 		if (str[i] == '\'')
 		{
-			while (str[i + 1] != '\'')
+			i++;
+			while (str[i] && str[i] != '\'')
 				i++;
-			i += 2;
+			if (str[i] == '\'')
+				i++;
 		}
 		else
 			i++;

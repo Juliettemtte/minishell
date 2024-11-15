@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:45:51 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/11 17:36:33 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/15 12:42:19 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,12 @@
 
 static void	empty_env(t_var *var)
 {
+	char	*pwd;
+
+	pwd = getcwd(NULL, 0);
+	pwd = ft_strjoin("PWD=", pwd);
 	var->og_envp = (char **)malloc(sizeof(char *) * 4);
-	var->og_envp[0] = ft_strdup("PWD=/home/jmouette/Studies/Rank03/minishell");
+	var->og_envp[0] = ft_strdup(pwd);
 	var->og_envp[1] = ft_strdup("SHLVL=2");
 	var->og_envp[2] = ft_strdup("_=/usr/bin/env");
 	var->og_envp[3] = NULL;

@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/03 10:42:58 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 11:57:58 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 09:43:08 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,10 @@ static void	initialise(t_var *variables)
 	init_signal();
 }
 
+//ctrl-C and ctrl-D both cause the readline input to be null
+//if ctrl-C, restore stdin after it was closed in the signal
+//function. Only write a newline if it's the first call or if
+//the previous call was just enter
 static void	handle_null_input(t_var *var)
 {
 	if (g_signal == SIGINT)

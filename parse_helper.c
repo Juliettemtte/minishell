@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_helper.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/24 14:38:02 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 11:20:11 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 12:34:53 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static int	process_double_quotes(t_var *var, int *k, int i)
 	{
 		if (var->input[i] == '$' && check_symbols(var->input[i + 1]) == 0)
 		{
-			len = (check_env(var, i));
+			len = (check_env(var, i + 1, 0));
 			if (len > 0)
 				i += len;
 			else
@@ -81,16 +81,15 @@ static int	process_special_characters2(t_var *var, int *i, int *k)
 	return (0);
 }
 
-static int	process_special_characters(t_var *var, int i, int k)
+static int	process_special_characters(t_var *var, int check, int i, int k)
 {
 	int	len;
-	int	check;
 
 	while (var->input[i])
 	{
 		if (var->input[i] == '$' && check_symbols(var->input[i + 1]) == 0)
 		{
-			len = check_env(var, i);
+			len = check_env(var, i + 1, 0);
 			if (len > 0)
 				i += len;
 			else
@@ -101,7 +100,8 @@ static int	process_special_characters(t_var *var, int i, int k)
 			var->str[k++] = ' ';
 			i++;
 		}
-		check = process_special_characters2(var, &i, &k);
+		else
+			check = process_special_characters2(var, &i, &k);
 		if (check == 1 || check == 2)
 			return (check);
 	}
@@ -124,7 +124,7 @@ int	parse_add_spaces(t_var *var, int i, int k)
 	var->str = malloc(sizeof(char) * (k + 1));
 	if (!var->str)
 		return (1);
-	check = process_special_characters(var, 0, 0);
+	check = process_special_characters(var, 0, 0, 0);
 	if (check == 1 || check == 2)
 	{
 		if (check == 1)

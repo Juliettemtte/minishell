@@ -6,12 +6,16 @@
 /*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 11:49:09 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 14:01:57 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 09:48:30 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+//tokenise the input that has been parsed into a char *array,
+//check if there are heredocs and allocate space for them, then
+//check if pipes or redirections exist and either run a single
+//command line, or go to handle_pipe for redirection and pipe handling
 static int	handle_commands(t_var *var)
 {
 	var->tokens = malloc(sizeof(t_token) * (count_cmd_list(var->cmd_list) + 1));
@@ -60,6 +64,9 @@ static int	parse_and_execute_helper(t_var *var)
 	return (check);
 }
 
+//if input is only enter, don't add it to history just
+//like bash, otherwise continue to parsing and update exit
+//codes if signals were received
 void	parse_and_execute(t_var *var)
 {
 	if (var->input[0] != '\0')

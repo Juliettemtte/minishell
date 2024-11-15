@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/30 11:29:33 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 11:15:11 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/14 15:01:21 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ int	ft_envcmp(char *envp, char *str)
 			return (1);
 		i++;
 	}
+	if (str[i] != '\0')
+		return (1);
 	return (0);
 }
 

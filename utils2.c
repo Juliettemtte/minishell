@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils2.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 10:59:52 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 14:37:48 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 12:29:53 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ static char	*create_new_string(char *str, int i, char *value, int end)
 		temp[k++] = str[end++];
 	temp[k] = '\0';
 	free(str);
+	free(value);
 	return (temp);
 }
 
@@ -76,6 +77,8 @@ char	*get_env_value(t_var *var, char *str, int i)
 			end++;
 		temp = ft_substr(str, i + 1, end - (i + 1));
 		value = ft_getenv(temp, var->envp);
+		if (value)
+			value = ft_strdup(value);
 		free(temp);
 	}
 	if (value == NULL)

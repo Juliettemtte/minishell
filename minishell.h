@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/14 11:51:15 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 12:34:03 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ int		parse(t_var *variables);
 int		parse_add_spaces(t_var *var, int i, int k);
 
 /************ parse_utils ************/
-int		check_env(t_var *var, int i);
+int		check_env(t_var *var, int i, int k);
 int		validate_heredoc_input(char *input);
 int		check_symbols(char c);
 void	copy1_with_space(char *input, char *str, int *i, int *k);

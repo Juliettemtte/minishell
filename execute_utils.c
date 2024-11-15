@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: arissane <arissane@student.hive.fi>        +#+  +:+       +#+        */
+/*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 11:02:48 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/14 11:03:23 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/15 13:06:00 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@ int	handle_exec_errors(char *command)
 	error_code = 0;
 	if (command[0] == '/' || (command[0] == '.' && command[1] == '/'))
 		error_code = validate_cmd_path(command);
-	else if ((command[0] != '<' && command[1] != '<')
-		&& (command[0] != '>' && command[1] != '>'))
+	else
 	{
 		error_code = 127;
 		ft_putstr_fd(" command not found\n", 2);

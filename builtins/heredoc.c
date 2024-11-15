@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 09:10:36 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/13 15:56:23 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/15 10:48:21 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	redirect_heredoc(t_var *var, t_token *token)
 }
 
 //start a loop of readline until delimiter is encountered and write to
-//var->heredoc_fds[]
+//var->heredoc_fds[]. If ctrl-C, stdin is closed and g_signal set to SIGINT
 static int	create_heredoc(t_var *var, char *delimiter, int heredoc_index)
 {
 	int		pipe_fd[2];
@@ -70,7 +70,6 @@ static int	create_heredoc(t_var *var, char *delimiter, int heredoc_index)
 	return (0);
 }
 
-//read input to each heredoc fd
 int	handle_heredoc(t_var *var, t_token *tokens)
 {
 	int		i;
@@ -84,6 +83,7 @@ int	handle_heredoc(t_var *var, t_token *tokens)
 			if (tokens[i].type == HEREDOC)
 			{
 				delimiter = remove_quotes(tokens[i + 1].value);
+				signal(SIGINT, handle_sigint_heredoc);
 				if (create_heredoc(var, delimiter,
 						tokens[i].heredoc_index) == 1)
 				{
