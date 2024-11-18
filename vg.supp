@@ -974,3 +974,17 @@
    fun:run_shell
    fun:main
 }
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:xmalloc
+   fun:alloc_history_entry
+   fun:add_history
+   fun:parse_and_execute
+   fun:run_shell
+   fun:main
+}
+

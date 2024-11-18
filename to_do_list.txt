@@ -1,44 +1,30 @@
-LEFT TO DO:
-check leaks
-if the current directory is removed, cd and pwd break
--mkdir test; cd test; -> in another window rm -rf test
-
-((((((((((((Env | grep=PWD => should work ))))))))))))
-
-
-
-DONE:
-Export hello => just add hello
-Export hello= => add hello=‘’
-Export 42 t=Hello => should export t not exit because of 42
-Export mini=‘ls -la’ + $mini => should return something
-Echo “‘$USER’” => should be ‘arissane’ 
+Left to do:
 Pressing only enter after a executing a command should not reset the exit code
+Spaces | cat -e
 Env -i .\minishell => env -i bash => if it’s null create a default env 
 “” => should return command not found like “ “
-Cat << ‘1’ => should be like cat << 1
-Spaces | cat -e => should not work syntax error
->>>>>>>>> => syntax error
-<<1 cat >> o => not working 
-<< => seg fault 
-> => should not work
-‘>>’ out2 => should not work
-Exit code with ctrl D => should be 1 
-Exit with too many arguments
+/bin/cat < Makefile => leaks
+Export 42 t=Hello => should export t not exit because of 42
+Export hello => just add hello
+Export hello= => add hello=‘’
 Exit with a big big big number => numeric argument required
+Exit with too many arguments 
+Exit code with ctrl D => should be 1 
+Exit code wrong if we run a program with sec fault
+Cat << ‘1’ => should be like cat << 1
+Echo “‘$USER’” => should be ‘arissane’ 
+‘>>’ out2 => should not work
+=> should not work
 ./minishell hello => should be an error 
 Env word word => should error 
+Export mini=‘ls -la’ + $mini => should return something 
 Unset -I => error should be unset not export 
-/bin/cat < Makefile => leaks
-If we remove PWD, OLDPWD should be empty
-Exit code wrong if we run a program with sec fault
-export 1 OK - export with same name NOT OK
 Rm a folder (../../dir) we are in and pwd => should not exit
-
-
-
-
-
+Env | grep=PWD => should work 
+(If we remove PWD, OLDPWD is empty => should have something) ? 
+<<1 cat >> o => not working 
+<< => seg fault 
+>>>>>>>>> => syntax error
 
 Should be working for now:
 -Display prompt
@@ -58,14 +44,6 @@ Should be working for now:
 -<< <  > >> (probably works now?)
 - unset
 - export & export ARG
-
-
-
-
-
-
-
-
 
 
 Some thoughts of the day:

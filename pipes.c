@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/12 16:27:40 by jmouette          #+#    #+#             */
-/*   Updated: 2024/10/22 13:55:38 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/18 16:37:32 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,14 @@ static void	handle_child_process(t_var *var, t_token **token_group)
 
 	check = handle_redirect(var, token_group, 0);
 	if (check == -2)
-		exit(run_command(var, token_group));
+	{
+		check = run_command(var, token_group);
+		free_env(&var->envp);
+		free_shell(var);
+		exit(check);
+	}
+	free_env(&var->envp);
+	free_shell(var);
 	exit(check);
 }
 
@@ -88,6 +95,8 @@ void	handle_pipe(t_token ***token_groups, int num_commands, t_var *var)
 	pid_t	pid;
 
 	i = 0;
+	close(var->fd_in);
+	var->fd_in = -1;
 	while (i < num_commands)
 	{
 		if (i < num_commands - 1 && pipe(pipefd) == -1)
