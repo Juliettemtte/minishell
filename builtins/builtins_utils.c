@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/04 14:58:17 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/15 12:59:06 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/23 15:22:32 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,23 +28,21 @@ int	find_command_index(t_token **tokens, const char *command)
 	return (-1);
 }
 
-int	is_valid_identifier(const char *arg, char *cmd)
+int	is_valid_identifier(const char *arg)
 {
 	int	i;
 
 	i = 1;
 	if (!arg || (!ft_isalpha(arg[0]) && arg[0] != '_'))
 	{
-		ft_putstr_fd(cmd, 2);
-		ft_putstr_fd(": not a valid identifier\n", 2);
+		ft_putstr_fd("export: not a valid identifier\n", 2);
 		return (1);
 	}
 	while (arg[i] != '\0' && arg[i] != '=')
 	{
 		if (!ft_isalnum(arg[i]) && arg[i] != '_')
 		{
-			ft_putstr_fd(cmd, 2);
-			ft_putstr_fd(": not a valid identifier\n", 2);
+			ft_putstr_fd("export: not a valid identifier\n", 2);
 			return (1);
 		}
 		i++;

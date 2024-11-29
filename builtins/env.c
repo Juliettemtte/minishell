@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/05 17:45:51 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/18 14:53:19 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/23 16:29:20 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,22 +51,47 @@ void	copy_env(t_var *var, char **envp)
 	var->envp = var->og_envp;
 }
 
-int	handle_env(t_var *var, t_token **token)
+static int	check_args(t_token **token, int i)
 {
-	int	i;
-
-	i = find_command_index(token, "env");
-	ft_unset("COLUMNS", ft_strlen("COLUMNS"), var);
-	ft_unset("LINES", ft_strlen("LINES"), var);
-	if (token[i + 1] && token[i + 1]->type == 2)
+	if (token[i + 1] && token[i + 1]->value[0] == '-'
+		&& token[i + 1]->value[1] && ft_isascii(token[i + 1]->value[1]))
 	{
-		printf("Too many arguments\n");
+		ft_putstr_fd("pwd: no option allowed\n", 2);
+		return (2);
+	}
+	if (token[i + 1] && token[i + 1]->type == 2
+		&& token[i + 1]->value[0] != '-')
+	{
+		ft_putstr_fd("pwd: too many arguments\n", 2);
 		return (1);
 	}
+	return (0);
+}
+
+int	handle_env(t_var *var, t_token **token)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+
+	i = find_command_index(token, "env");
+	j = check_args(token, i);
+	if (j != 0)
+		return (j);
+	if (token[i + 1] && token[i + 1]->value[0] == '-')
+		return (0);
 	i = 0;
 	while (var->envp[i] != NULL)
 	{
-		printf("%s\n", var->envp[i]);
+		tmp = ft_strchr(var->envp[i], '=');
+		if (tmp != 0 && tmp[1] != '\"' && tmp[2] != '\"')
+			printf("%s\n", var->envp[i]);
+		else if (tmp != 0)
+		{
+			tmp = ft_strtrim(var->envp[i], "\"");
+			printf("%s\n", tmp);
+			free(tmp);
+		}
 		i++;
 	}
 	return (0);
@@ -94,7 +119,7 @@ int	print_env_sorted(t_var *var)
 	j = 0;
 	while (j < i)
 	{
-		printf("%s\n", sorted_env[j]);
+		printf("declare -x %s\n", sorted_env[j]);
 		j++;
 	}
 	free(sorted_env);

@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/03 17:14:20 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/15 10:41:32 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/23 15:56:10 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,17 @@ static long	get_numeric_exit_value(t_token **token, int i, int j, int is_neg)
 	return (exit_code);
 }
 
+int	number_args(t_token **token, int j, int exit_code)
+{
+	if (token[j + 1] != NULL && token[j + 1]->value != NULL && exit_code != 2
+		&& token[j + 1]->type == 2)
+	{
+		write(2, "exit: too many arguments\n", 25);
+		return (-3);
+	}
+	return (0);
+}
+
 int	my_exit(t_token **token)
 {
 	long	exit_code;
@@ -51,11 +62,6 @@ int	my_exit(t_token **token)
 	j++;
 	if (token[j] == NULL || token[j]->value == NULL)
 		return (0);
-	if (token[j + 1] != NULL && token[j + 1]->value != NULL)
-	{
-		write(2, "exit: too many arguments\n", 25);
-		return (-3);
-	}
 	while (token[j]->value[i] == '+' || token[j]->value[i] == '"')
 		i++;
 	if (token[j]->value[i] == '-')
@@ -64,5 +70,7 @@ int	my_exit(t_token **token)
 		i++;
 	}
 	exit_code = get_numeric_exit_value(token, i, j, is_negative);
+	if (number_args(token, j, exit_code) == -3)
+		return (-3);
 	return (exit_code);
 }

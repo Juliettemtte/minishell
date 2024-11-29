@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 09:08:47 by arissane          #+#    #+#             */
-/*   Updated: 2024/11/15 10:04:10 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/21 15:23:04 by arissane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,23 @@ static int	print_string(t_token **token, int i)
 	return (i);
 }
 
+static int	check_n_syntax(char *str)
+{
+	int	i;
+
+	if (str[0] == '-')
+		i = 1;
+	else
+		return (1);
+	while (str[i])
+	{
+		if (str[i] != 'n')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
 int	handle_echo(t_token **token)
 {
 	int	i;
@@ -51,12 +68,12 @@ int	handle_echo(t_token **token)
 
 	i = 1;
 	check_n = 0;
-	if (token[i] && ft_strncmp(token[i]->value, "-n", 2) == 0)
+	if (token[i] && check_n_syntax(token[i]->value) == 0)
 	{
 		check_n = 1;
 		i++;
 	}
-	while (token[i] && ft_strncmp(token[i]->value, "-n", 2) == 0)
+	while (token[i] && check_n_syntax(token[i]->value) == 0)
 		i++;
 	while (token[i])
 	{

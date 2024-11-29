@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 18:16:49 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/14 13:35:13 by jmouette         ###   ########.fr       */
+/*   Updated: 2024/11/23 16:15:49 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static char	*check_export(t_token **token, int i, char ***cmd)
 	char	*equal_sign;
 	char	*value;
 
-	if (is_valid_identifier(token[i]->value, "export"))
+	if (is_valid_identifier(token[i]->value))
 		return (NULL);
 	*cmd = malloc(sizeof(char *));
 	if (!(*cmd))
@@ -101,16 +101,22 @@ static int	export_variable(t_token **token_group, int index, t_var *var)
 	return (1);
 }
 
-int	handle_export(t_token **token_group, t_var *var)
+int	handle_export(t_token **token, t_var *var)
 {
 	int	i;
 
-	i = find_command_index(token_group, "export");
-	if (i == 0 && token_group[i + 1] == NULL)
+	i = find_command_index(token, "export");
+	if (i == 0 && token[i + 1] == NULL)
 		return (print_env_sorted(var));
-	while (token_group[i + 1] && token_group[i + 1]->type == 2)
+	if (token[i + 1]->value[0] == '-' && token[i + 1]->value[1]
+		&& ft_isascii(token[i + 1]->value[1]))
 	{
-		if (!export_variable(token_group, i + 1, var))
+		ft_putstr_fd("export: no option allowed\n", 2);
+		return (2);
+	}
+	while (token[i + 1] && token[i + 1]->type == 2)
+	{
+		if (!export_variable(token, i + 1, var))
 			var->exit_code = 1;
 		i++;
 	}

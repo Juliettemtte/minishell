@@ -6,7 +6,7 @@
 /*   By: jmouette <jmouette@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 16:34:15 by jmouette          #+#    #+#             */
-/*   Updated: 2024/11/15 12:34:03 by arissane         ###   ########.fr       */
+/*   Updated: 2024/11/23 15:37:50 by jmouette         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ int		count_cmd(char **cmd_list);
 /************** utils3 ***************/
 int		ft_envcmp(char *envp, char *str);
 long	ft_atol(const char *str, int i);
+int		handle_pipe_error(int *pipefd);
 int		validate_cmd_path(char *cmd);
 
 /********* check_characters **********/
@@ -162,20 +163,20 @@ int		redirect_append(char *target, t_var *var);
 int		handle_cd(t_token **token_group, t_var *var);
 void	copy_env(t_var *var, char **envp);
 int		handle_env(t_var *var, t_token **token);
-int		handle_export(t_token **token_group, t_var *var);
+int		handle_export(t_token **token, t_var *var);
 int		ft_unset(char *name, size_t name_len, t_var *var);
 int		handle_unset(t_token **token, t_var *var);
 int		print_env_sorted(t_var *var);
 int		init_heredoc_fds(t_var *var);
 int		handle_heredoc(t_var *var, t_token *tokens);
 int		redirect_heredoc(t_var *var, t_token *token);
-int		handle_pwd(t_var *var);
+int		handle_pwd(t_var *var, t_token **token);
 int		handle_echo(t_token **token_group);
 int		my_exit(t_token **token);
 
 /********** builtins_utils ************/
 int		find_command_index(t_token **tokens, const char *command);
-int		is_valid_identifier(const char *arg, char *cmd);
+int		is_valid_identifier(const char *arg);
 void	change_env_cd(char *old_pwd, char *new_pwd, t_var *var);
 void	export_cd(char *name, char *value, t_var *var);
 
