@@ -21,7 +21,7 @@ static char	*find_command(t_token **token_group)
 	i = 0;
 	while (token_group[i] && token_group[i]->value && token_group[i]->type > 2)
 	{
-		if (token_group[i]->type != 6)
+		if (token_group[i]->type != 6 || token_group[i]->type != 5)
 			i++;
 		i++;
 	}
